@@ -19,7 +19,11 @@ mobile/  Flutter Android (scan)                ← Étape 4 (à venir)
 - ✅ **Étape 3 — Dashboard organisateur** (`web/`) : login/register, liste &
   CRUD events, génération de lots de billets + QR, validation des inscriptions,
   révocation, scanners/portes, stats live (10 s) + affluence/heure, export CSV.
-- ⬜ Étape 4 — App mobile Flutter
+- ✅ **Étape 4 — App mobile Flutter** (`mobile/`, Android) : login scanner par
+  code de porte (token en `flutter_secure_storage`), scan caméra (`mobile_scanner`),
+  validation `/scan` (`dio`) avec feedback couleur/son/vibration, compteur d'entrées
+  temps réel, **mode offline** (cache `sqflite` + file de scans + sync auto au retour
+  réseau). Build : `flutter build apk --release`.
 
 ## Décisions techniques
 
@@ -73,6 +77,28 @@ Déploiement Cloudflare Pages : build `npm run build`, dossier de sortie `dist`,
 variable `VITE_API_URL` = URL du Worker. Le fichier `public/_redirects` assure le
 fallback SPA. Pensez à ajouter l'origine Pages dans `ALLOWED_ORIGINS` de l'API.
 
+## App mobile (Flutter, Android)
+
+```bash
+cd mobile
+flutter pub get
+# Émulateur : l'API locale est joignable via 10.0.2.2 (déjà par défaut).
+flutter run
+
+# APK distribuable (pointant vers l'API de prod) :
+flutter build apk --release --dart-define=API_URL=https://qr-events-api.<sous-domaine>.workers.dev
+# → build/app/outputs/flutter-apk/app-release.apk
+```
+
+Le code de porte se crée dans le dashboard (onglet **Scanners**). Le scanner se
+connecte avec ce code ; le token est stocké chiffré. Mode offline : au premier
+login en ligne, l'app télécharge le manifeste des billets (`GET /scan/manifest`)
+puis peut valider sans réseau ; les scans hors-ligne sont rejoués automatiquement.
+
+> Signature APK : par défaut le build release utilise la clé debug (installable en
+> direct). Pour une vraie distribution, créer un keystore et configurer
+> `android/app/build.gradle.kts` + `key.properties`.
+
 ---
 
 ## Endpoints
@@ -114,6 +140,7 @@ Réponse uniforme : `{ ok: true, data }` ou `{ ok: false, error: { code, message
 |---|---|---|
 | POST | `/scanner/login` | `{ access_code }` → token scanner (public) |
 | POST | `/scan` | `{ token, deviceId }` → `ok\|already_used\|invalid\|revoked\|pending\|wrong_event` |
+| GET | `/scan/manifest` | Billets de l'événement (cache offline mobile) |
 
 `/scan` supporte un header `Idempotency-Key` (rejeu réseau → même résultat, KV 120 s).
 

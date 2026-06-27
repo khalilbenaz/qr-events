@@ -8,6 +8,19 @@ import { requireScanner } from "../middleware/scanner";
 const scan = new Hono<AppEnv>();
 scan.use("*", requireScanner);
 
+// GET /scan/manifest — billets de l'événement du scanner (pour cache offline).
+// Le staff est de confiance pour son événement : on lui fournit les tokens
+// afin de valider hors-ligne et connaître les billets déjà utilisés.
+scan.get("/manifest", async (c) => {
+  const eventId = c.get("scannerEventId");
+  const ev = await c.env.DB.prepare("SELECT id, name FROM events WHERE id = ?")
+    .bind(eventId).first<{ id: string; name: string }>();
+  const { results } = await c.env.DB.prepare(
+    "SELECT id, qr_token, holder_name, category, status FROM tickets WHERE event_id = ?"
+  ).bind(eventId).all();
+  return ok(c, { event: ev, tickets: results, syncedAt: new Date().toISOString() });
+});
+
 interface ScanResponse {
   result: ScanResult;
   message: string;

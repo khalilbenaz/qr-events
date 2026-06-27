@@ -5,8 +5,9 @@ import { api, getToken, setToken } from "../lib/api";
 interface AuthState {
   organizer: Organizer | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, name: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<Organizer>;
+  register: (email: string, name: string, password: string) => Promise<Organizer>;
+  refresh: () => Promise<void>;
   logout: () => void;
 }
 
@@ -22,16 +23,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
   const [loading, setLoading] = useState(false);
 
-  // Si un token existe sans org en cache (rare), on nettoie au montage.
-  useEffect(() => {
-    if (!getToken()) setOrganizer(null);
-  }, []);
-
   const persist = (token: string, org: Organizer) => {
     setToken(token);
     localStorage.setItem(ORG_KEY, JSON.stringify(org));
     setOrganizer(org);
   };
+
+  const refresh = async () => {
+    if (!getToken()) { setOrganizer(null); return; }
+    try {
+      const o = await api<Organizer>("/me");
+      localStorage.setItem(ORG_KEY, JSON.stringify(o));
+      setOrganizer(o);
+    } catch {
+      /* token invalide → api() a déjà nettoyé */
+      setOrganizer(null);
+    }
+  };
+
+  // Rafraîchit le statut du compte au montage (validation admin, changement d'offre).
+  useEffect(() => { refresh(); /* eslint-disable-next-line */ }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
@@ -40,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: { email, password }, auth: false,
       });
       persist(d.token, d.organizer);
+      return d.organizer;
     } finally { setLoading(false); }
   };
 
@@ -50,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: { email, name, password }, auth: false,
       });
       persist(d.token, d.organizer);
+      return d.organizer;
     } finally { setLoading(false); }
   };
 
@@ -60,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <Ctx.Provider value={{ organizer, loading, login, register, logout }}>
+    <Ctx.Provider value={{ organizer, loading, login, register, refresh, logout }}>
       {children}
     </Ctx.Provider>
   );

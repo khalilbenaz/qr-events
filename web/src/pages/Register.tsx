@@ -17,8 +17,8 @@ export default function Register() {
     e.preventDefault();
     setErr("");
     try {
-      await register(email, name, password);
-      nav("/app/events");
+      const org = await register(email, name, password);
+      nav(org.role === "admin" ? "/app/admin" : "/app/events");
     } catch (e) {
       setErr(e instanceof ApiError ? e.message : "Erreur d'inscription");
     }

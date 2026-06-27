@@ -2,11 +2,25 @@ export type RegistrationMode = "none" | "open" | "approval";
 export type EventStatus = "draft" | "published" | "closed";
 export type TicketStatus = "valid" | "used" | "revoked" | "pending";
 
+export type OrganizerRole = "organizer" | "admin";
+export type OrganizerStatus = "pending" | "approved" | "suspended";
+
 export interface Organizer {
   id: string;
   email: string;
   name: string;
   slug: string;
+  role: OrganizerRole;
+  status: OrganizerStatus;
+  plan: string | null;
+}
+
+export interface Plan {
+  slug: string;
+  label: string;
+  maxEvents: number | null;
+  maxTicketsPerEvent: number | null;
+  price: string;
 }
 
 export interface EventRow {
@@ -64,6 +78,7 @@ export interface PublicEvent {
   capacity: number | null;
   categories: string[];
   theme: string | null;
+  organizer: string;
   remaining: number | null;
   soldOut: boolean;
 }

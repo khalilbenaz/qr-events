@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import type { AppContext, AppEnv, TicketRow, TicketStatus } from "../types";
 import { newId, signQrToken } from "../lib/crypto";
+import { planOf } from "../lib/plans";
 import { ApiError, ok } from "../lib/response";
 import { getOwnedEvent } from "../middleware/tenant";
 
@@ -47,6 +48,17 @@ tickets.post("/events/:eventId/tickets/batch", async (c) => {
   const count = holders.length > 0 ? holders.length : b.count ?? 0;
   if (!Number.isInteger(count) || count < 1 || count > 1000)
     throw new ApiError(400, "invalid_count", "count entre 1 et 1000");
+
+  // Limite d'offre : nombre de billets par événement.
+  const plan = planOf(c.get("organizerPlan"));
+  if (plan?.maxTicketsPerEvent != null) {
+    const row = await c.env.DB.prepare(
+      "SELECT COUNT(*) AS c FROM tickets WHERE event_id = ? AND status <> 'revoked'"
+    ).bind(ev.id).first<{ c: number }>();
+    if ((row?.c ?? 0) + count > plan.maxTicketsPerEvent)
+      throw new ApiError(403, "plan_limit_tickets",
+        `Offre ${plan.label} : limite de ${plan.maxTicketsPerEvent} billets/événement.`);
+  }
 
   // Respect de la capacité si définie.
   if (ev.capacity != null) {

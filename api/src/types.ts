@@ -8,12 +8,16 @@ export type Bindings = {
   QR_HMAC_SECRET: string;
   ALLOWED_ORIGINS: string;
   PUBLIC_API_URL: string;
+  ADMIN_EMAIL: string;
 };
 
 /** Variables posées sur le contexte par les middlewares. */
 export type Variables = {
   organizerId: string;
   organizerEmail: string;
+  organizerRole: OrganizerRole;
+  organizerStatus: OrganizerStatus;
+  organizerPlan: string | null;
 };
 
 export type AppEnv = { Bindings: Bindings; Variables: Variables };
@@ -30,12 +34,18 @@ export type ScanResult =
   | "pending"
   | "wrong_event";
 
+export type OrganizerRole = "organizer" | "admin";
+export type OrganizerStatus = "pending" | "approved" | "suspended";
+
 export interface Organizer {
   id: string;
   email: string;
   slug: string;
   name: string;
   password_hash: string;
+  role: OrganizerRole;
+  status: OrganizerStatus;
+  plan: string | null;
   created_at: string;
 }
 

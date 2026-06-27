@@ -15,12 +15,12 @@ async function resolvePublicEvent(
   c: AppContext,
   orgSlug: string,
   eventSlug: string
-): Promise<EventRow> {
+): Promise<EventRow & { organizer_name: string }> {
   const ev = await c.env.DB.prepare(
-    `SELECT e.* FROM events e
+    `SELECT e.*, o.name AS organizer_name FROM events e
        JOIN organizers o ON o.id = e.organizer_id
       WHERE o.slug = ? AND e.slug = ?`
-  ).bind(orgSlug, eventSlug).first<EventRow>();
+  ).bind(orgSlug, eventSlug).first<EventRow & { organizer_name: string }>();
   if (!ev || ev.status !== "published")
     throw new ApiError(404, "not_found", "Événement introuvable");
   return ev;
@@ -48,6 +48,7 @@ pub.get("/event/:orgSlug/:eventSlug", async (c) => {
     capacity: ev.capacity,
     categories: parseCategories(ev.categories),
     theme: ev.theme,
+    organizer: ev.organizer_name,
     remaining,
     soldOut: remaining !== null && remaining <= 0,
   });

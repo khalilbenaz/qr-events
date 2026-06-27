@@ -31,6 +31,9 @@ id = "1de26c7d1e844354b72a2a921fa13f9d"
 ALLOWED_ORIGINS = "https://qr-events.pages.dev,https://khalilbenaz.github.io,http://localhost:5173,http://localhost:4173"
 # Base URL publique de l'API (utilisée pour construire les liens QR).
 PUBLIC_API_URL = "https://qr-events-api.khalilbenaz.workers.dev"
+# Email de l'administrateur : ce compte est auto-validé + rôle admin à l'inscription.
+# Remplace par TON email puis redéploie (`npx wrangler deploy`).
+ADMIN_EMAIL = "demo@qrevents.app"
 
 # ---------------------------------------------------------------------------
 # Secrets (NE PAS mettre ici). En local -> .dev.vars. En prod :

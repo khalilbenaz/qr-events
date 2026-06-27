@@ -43,22 +43,26 @@ auth.post("/register", async (c) => {
     return !!r;
   });
 
+  // L'email admin (variable ADMIN_EMAIL) est auto-promu et auto-validé.
+  const isAdmin = email === (c.env.ADMIN_EMAIL ?? "").trim().toLowerCase();
+  const role = isAdmin ? "admin" : "organizer";
+  const status = isAdmin ? "approved" : "pending";
+  const plan = isAdmin ? "business" : null;
+
   const org: Organizer = {
     id: newId(),
-    email,
-    slug,
-    name,
+    email, slug, name,
     password_hash: await hashPassword(password),
-    created_at: "",
+    role, status, plan, created_at: "",
   };
   await c.env.DB.prepare(
-    "INSERT INTO organizers (id, email, slug, name, password_hash) VALUES (?, ?, ?, ?, ?)"
+    "INSERT INTO organizers (id, email, slug, name, password_hash, role, status, plan) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
   )
-    .bind(org.id, org.email, slug, org.name, org.password_hash)
+    .bind(org.id, org.email, slug, org.name, org.password_hash, role, status, plan)
     .run();
 
   const token = await issueToken(c, org);
-  return ok(c, { token, organizer: { id: org.id, email, name, slug } }, 201);
+  return ok(c, { token, organizer: { id: org.id, email, name, slug, role, status, plan } }, 201);
 });
 
 // POST /auth/login  { email, password }
@@ -80,7 +84,10 @@ auth.post("/login", async (c) => {
   const token = await issueToken(c, org);
   return ok(c, {
     token,
-    organizer: { id: org.id, email: org.email, name: org.name, slug: org.slug },
+    organizer: {
+      id: org.id, email: org.email, name: org.name, slug: org.slug,
+      role: org.role, status: org.status, plan: org.plan,
+    },
   });
 });
 

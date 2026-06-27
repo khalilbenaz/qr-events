@@ -3,6 +3,7 @@ import type { AppEnv, EventRow, RegistrationMode, EventStatus } from "../types";
 import { newId } from "../lib/crypto";
 import { normalizeCategories } from "../lib/categories";
 import { normalizeTheme } from "../lib/themes";
+import { planOf } from "../lib/plans";
 import { ApiError, ok } from "../lib/response";
 import { getOwnedEvent } from "../middleware/tenant";
 
@@ -48,6 +49,17 @@ events.post("/", async (c) => {
     throw new ApiError(400, "invalid_capacity", "Capacité invalide");
 
   const organizerId = c.get("organizerId");
+
+  // Limite d'offre : nombre d'événements.
+  const plan = planOf(c.get("organizerPlan"));
+  if (plan?.maxEvents != null) {
+    const row = await c.env.DB.prepare("SELECT COUNT(*) AS c FROM events WHERE organizer_id = ?")
+      .bind(organizerId).first<{ c: number }>();
+    if ((row?.c ?? 0) >= plan.maxEvents)
+      throw new ApiError(403, "plan_limit_events",
+        `Offre ${plan.label} : limite de ${plan.maxEvents} événement(s) atteinte.`);
+  }
+
   const dup = await c.env.DB.prepare(
     "SELECT id FROM events WHERE organizer_id = ? AND slug = ?"
   )

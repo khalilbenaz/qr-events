@@ -12,7 +12,8 @@ mobile de scan. Tout tient dans le **free tier Cloudflare**.
 | ⚙️ API (Cloudflare Worker) | https://qr-events-api.khalilbenaz.workers.dev |
 | 📱 Mobile (APK) | [Dernière release GitHub](https://github.com/khalilbenaz/qr-events/releases/latest) |
 
-> 🧪 **Compte démo** : `demo@qrevents.app` / `demo12345` (dashboard organisateur).
+> 🧪 **Démo** — organisateur : `demo@qrevents.app` / `demo12345` ·
+> admin : `demo@qrevents.app` / `***REMOVED***` (page `/app/admin`).
 
 📖 Docs : [Architecture](docs/ARCHITECTURE.md) · [Déploiement](docs/DEPLOYMENT.md)
 
@@ -39,15 +40,35 @@ mobile/  Flutter Android (scan)                ← Étape 4 ✅
   réseau). Build : `flutter build apk --release`.
 
 ### Fonctionnalités additionnelles
+- 👤 **Comptes & offres** : l'inscription d'un organisateur crée un compte **en attente** ;
+  un **administrateur** le valide et lui attribue une **offre** (Découverte / Pro / Business)
+  qui plafonne le nombre d'événements et de billets. Voir [Comptes & offres](#comptes--offres).
+- 🎨 **Templates par type d'événement** : la page publique adopte une mise en page **différente
+  selon le thème** — *Live* (concert/soirée/festival, immersif néon), *Élégant* (mariage/gala,
+  serif & or), *Pro* (conférence/atelier/expo, structuré), *Sport* (nerveux).
+- 🗺️ **Carte du lieu** intégrée (Google Maps sans clé) sur la page d'événement.
 - 🎟️ **Deux façons d'obtenir un billet, en parallèle** : génération manuelle de lots
   par l'organisateur **et** inscription publique en ligne (sur le même événement).
-- 🏷️ **Catégories de billets** (ex. Standard / VIP / Presse) définies par l'organisateur,
-  proposées au choix à l'inscription et validées côté API.
-- 🎨 **Thèmes d'événement** (concert, conférence, fête, sport, mariage, expo, atelier,
-  gala, festival…) : couleurs + emoji appliqués aux cartes et à la page publique.
-- 🔄 **Suivi d'inscription** (mode `approval`) : l'inscrit reçoit un lien permanent
-  `/ticket/:token` ; dès que l'organisateur valide, son QR apparaît (page auto-rafraîchie).
+- 🏷️ **Catégories de billets** (ex. Standard / VIP / Presse) proposées au choix à l'inscription.
+- 🔄 **Suivi d'inscription** (mode `approval`) : lien permanent `/ticket/:token` ; dès validation,
+  le QR apparaît (page auto-rafraîchie).
+- ⏳ **Compte à rebours** et **affiche de couverture** en hero.
 - 📦 **APK publié en GitHub Release** à chaque tag `v*`.
+
+### Comptes & offres
+
+- **Administrateur** : le compte dont l'email = `ADMIN_EMAIL` (variable du Worker) est
+  **auto-validé** avec le rôle admin. Mets-y **ton email** puis `npx wrangler deploy`, ou
+  utilise le compte admin de démo.
+- **Validation** : un nouvel organisateur est `pending` (il voit un écran d'attente et ne peut
+  rien créer). L'admin le valide depuis **`/app/admin`** et choisit son offre.
+- **Offres** (limites, modifiables dans `api/src/lib/plans.ts` + `web/src/lib/plans.ts`) :
+
+  | Offre | Événements | Billets / événement |
+  |---|---|---|
+  | Découverte | 1 | 100 |
+  | Pro | 10 | 2000 |
+  | Business | illimité | illimité |
 
 ## Décisions techniques
 
@@ -141,11 +162,21 @@ puis peut valider sans réseau ; les scans hors-ligne sont rejoués automatiquem
 
 Réponse uniforme : `{ ok: true, data }` ou `{ ok: false, error: { code, message } }`.
 
-### Auth organisateur
+### Auth & compte
 | Méthode | Route | Description |
 |---|---|---|
-| POST | `/auth/register` | `{ email, name, password }` → `{ token, organizer }` |
+| POST | `/auth/register` | `{ email, name, password }` → `{ token, organizer }` (statut `pending`) |
 | POST | `/auth/login` | `{ email, password }` → `{ token, organizer }` |
+| GET | `/me` | Compte courant (rôle, statut, offre) |
+
+### Admin (Bearer admin)
+| Méthode | Route | Description |
+|---|---|---|
+| GET | `/admin/organizers` | Tous les comptes (+ nb d'événements) |
+| GET | `/admin/plans` | Offres disponibles |
+| POST | `/admin/organizers/:id/approve` | `{ plan }` → valide + attribue l'offre |
+| POST | `/admin/organizers/:id/suspend` | Suspend le compte |
+| POST | `/admin/organizers/:id/plan` | `{ plan }` → change l'offre |
 
 ### Événements (Bearer organisateur)
 | Méthode | Route | Description |

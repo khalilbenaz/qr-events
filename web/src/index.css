@@ -245,3 +245,52 @@ body::after { width: 44vw; height: 44vw; right: -12vw; top: -6vw;
   }
   .reveal { opacity: 1; transform: none; }
 }
+
+/* ===================== Pages d'événement (templates) ===================== */
+.event-grid { display: grid; grid-template-columns: 1fr 360px; gap: 20px; align-items: start; }
+.event-grid > aside { position: sticky; top: 84px; }
+@media (max-width: 820px) { .event-grid { grid-template-columns: 1fr; } .event-grid > aside { position: static; } }
+.panel { box-shadow: 0 18px 50px -26px rgba(177,75,255,.6); }
+
+/* Compte à rebours */
+.countdown { display: flex; gap: 10px; }
+.cd { min-width: 58px; padding: 10px 8px; border-radius: 12px; text-align: center;
+  background: rgba(0,0,0,.32); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(6px); }
+.cd-n { font-size: 1.5rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.cd-l { font-size: .62rem; text-transform: uppercase; letter-spacing: .14em; opacity: .8; margin-top: 4px; }
+.countdown.light .cd { background: var(--surface-2); border-color: var(--border); }
+
+/* Infos pratiques (template pro) */
+.infos { list-style: none; margin: 0; padding: 0; }
+.infos li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0;
+  border-bottom: 1px solid var(--border); font-size: .92rem; }
+.infos li:last-child { border-bottom: none; }
+.infos li span { color: var(--muted); }
+.infos li b { text-align: right; }
+
+/* --- Template PRO : plus sobre --- */
+.tpl-pro .hero::before { display: none; }
+.tpl-pro .hero { border-radius: 18px; }
+
+/* --- Template ELEGANT : serif, or, centré --- */
+.tpl-elegant { max-width: 720px; margin: 0 auto; }
+.tpl-elegant .elegant-head { text-align: center; padding: 14px 0 6px; }
+.tpl-elegant h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 700;
+  font-size: clamp(2.4rem, 6vw, 3.6rem); letter-spacing: 0; color: #f6efe2; }
+.tpl-elegant h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 700; }
+.tpl-elegant .eyebrow { text-transform: uppercase; letter-spacing: .34em; font-size: .72rem;
+  color: #d9b06a; font-weight: 700; margin: 0 0 6px; }
+.tpl-elegant .when { color: var(--muted); font-size: 1.05rem; margin: 6px 0 0; }
+.tpl-elegant .rule { display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin: 18px 0; color: #d9b06a; }
+.tpl-elegant .rule::before, .tpl-elegant .rule::after { content: ""; height: 1px; width: 90px;
+  background: linear-gradient(90deg, transparent, #d9b06a); }
+.tpl-elegant .rule::after { background: linear-gradient(90deg, #d9b06a, transparent); }
+.tpl-elegant .elegant-body { margin-top: 22px; }
+.tpl-elegant .btn.primary { background: linear-gradient(135deg, #d9b06a, #b8860b); box-shadow: 0 0 22px -4px rgba(217,176,106,.6); }
+.tpl-elegant .cover { max-height: 340px; }
+
+/* --- Template SPORT : nerveux --- */
+.tpl-sport h1 { font-weight: 900; letter-spacing: -.02em; }
+.tpl-sport .cd-n { color: #b6ff5c; }
+.tpl-sport .progress > div { background: linear-gradient(90deg, #16a34a, #a3e635); box-shadow: 0 0 14px rgba(132,204,22,.6); }

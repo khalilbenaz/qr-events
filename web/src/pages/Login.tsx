@@ -16,8 +16,8 @@ export default function Login() {
     e.preventDefault();
     setErr("");
     try {
-      await login(email, password);
-      nav("/app/events");
+      const org = await login(email, password);
+      nav(org.role === "admin" ? "/app/admin" : "/app/events");
     } catch (e) {
       setErr(e instanceof ApiError ? e.message : "Erreur de connexion");
     }

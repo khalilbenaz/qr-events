@@ -12,10 +12,15 @@ import EventDetail from "./pages/EventDetail";
 import PublicEvent from "./pages/PublicEvent";
 import TicketStatus from "./pages/TicketStatus";
 import NotFound from "./pages/NotFound";
+import PendingScreen from "./pages/PendingScreen";
+import AdminPage from "./pages/AdminPage";
 
 function Protected({ children }: { children: ReactNode }) {
   const { organizer } = useAuth();
   if (!organizer) return <Navigate to="/app/login" replace />;
+  // Compte non validé (hors admin) → écran d'attente.
+  if (organizer.role !== "admin" && organizer.status !== "approved")
+    return <AppLayout><PendingScreen /></AppLayout>;
   return <AppLayout>{children}</AppLayout>;
 }
 
@@ -32,6 +37,7 @@ export default function App() {
       <Route path="/app/events" element={<Protected><EventsList /></Protected>} />
       <Route path="/app/events/new" element={<Protected><EventNew /></Protected>} />
       <Route path="/app/events/:id" element={<Protected><EventDetail /></Protected>} />
+      <Route path="/app/admin" element={<Protected><AdminPage /></Protected>} />
 
       {/* Suivi d'un billet (récupération du QR après validation) */}
       <Route path="/ticket/:token" element={<TicketStatus />} />

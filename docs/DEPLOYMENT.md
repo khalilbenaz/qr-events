@@ -11,11 +11,13 @@ Le projet est **déjà déployé**. Cette page documente l'état et comment repr
 | D1 database | `qr-events` (`c49e10ec-…`) |
 | KV namespace | `CACHE` (`1de26c7d…`) |
 | Compte Cloudflare | demo@qrevents.app |
-| Dépôt | `khalilbenaz/qr-events` (privé) |
+| Dépôt | `khalilbenaz/qr-events` (public) |
 
-> ⚠️ **Visibilité** : le dépôt est privé, mais un site **GitHub Pages publié reste public**
-> (les Pages privées nécessitent GitHub Enterprise). Le code source reste donc privé,
-> mais l'app web est accessible publiquement à l'URL ci-dessus.
+> ℹ️ **Visibilité** : GitHub Pages n'est pas disponible pour un dépôt **privé** sur le plan
+> gratuit (il faut GitHub Pro/Team). Le dépôt a donc été rendu **public** pour activer Pages.
+> Aucun secret n'est committé (les secrets — `JWT_SECRET`, `QR_HMAC_SECRET` — sont des
+> secrets Cloudflare ; `.dev.vars` et `.env` sont gitignorés).
+> Alternative pour garder le source privé : héberger le web sur **Cloudflare Pages**.
 
 ## 1. Backend — Cloudflare Workers
 

@@ -18,7 +18,8 @@ export default function InfoTab({ ev, onChange }: { ev: EventRow; onChange: () =
   const [busy, setBusy] = useState(false);
   const set = (k: keyof typeof f, v: string) => setF((p) => ({ ...p, [k]: v }));
 
-  const publicPath = `/${organizer?.slug}/${ev.slug}`;
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const publicPath = `${base}/${organizer?.slug}/${ev.slug}`;
   const publicUrl = `${location.origin}${publicPath}`;
 
   const save = async (e: React.FormEvent) => {

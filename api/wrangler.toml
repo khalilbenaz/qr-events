@@ -11,7 +11,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "qr-events"
-database_id = "REMPLACER_PAR_VOTRE_DATABASE_ID"
+database_id = "c49e10ec-e6a0-496b-8cff-2df18e440b2a"
 migrations_dir = "migrations"
 
 # ---------------------------------------------------------------------------
@@ -20,17 +20,17 @@ migrations_dir = "migrations"
 # ---------------------------------------------------------------------------
 [[kv_namespaces]]
 binding = "CACHE"
-id = "REMPLACER_PAR_VOTRE_KV_ID"
+id = "1de26c7d1e844354b72a2a921fa13f9d"
 
 # ---------------------------------------------------------------------------
 # Variables NON secrètes
 # ---------------------------------------------------------------------------
 [vars]
 # Origine(s) autorisée(s) pour le CORS (dashboard + pages publiques).
-# En prod : "https://qr-events.pages.dev". Plusieurs valeurs séparées par des virgules.
-ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:4173"
+# Inclut GitHub Pages (site web) + le dev local. Plusieurs valeurs séparées par des virgules.
+ALLOWED_ORIGINS = "https://khalilbenaz.github.io,http://localhost:5173,http://localhost:4173"
 # Base URL publique de l'API (utilisée pour construire les liens QR).
-PUBLIC_API_URL = "http://localhost:8787"
+PUBLIC_API_URL = "https://qr-events-api.khalilbenaz.workers.dev"
 
 # ---------------------------------------------------------------------------
 # Secrets (NE PAS mettre ici). En local -> .dev.vars. En prod :

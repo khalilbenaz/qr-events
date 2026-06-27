@@ -3,6 +3,16 @@
 Monorepo : événements, QR codes signés, pages publiques d'inscription et app
 mobile de scan. Tout tient dans le **free tier Cloudflare**.
 
+## 🔗 Live
+
+| Service | URL |
+|---|---|
+| 🌐 Web (dashboard + pages publiques) | https://khalilbenaz.github.io/qr-events/ |
+| ⚙️ API (Cloudflare Worker) | https://qr-events-api.khalilbenaz.workers.dev |
+| 📱 Mobile | APK Android — `flutter build apk --release` |
+
+📖 Docs : [Architecture](docs/ARCHITECTURE.md) · [Déploiement](docs/DEPLOYMENT.md)
+
 ```
 api/     Cloudflare Workers + Hono + D1 + KV   ← Étape 1 (fait)
 web/     React + Vite (dashboard + pages)      ← Étape 2/3 (à venir)

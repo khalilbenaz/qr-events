@@ -83,6 +83,7 @@ p { line-height: 1.6; color: var(--muted); }
 
 /* Buttons */
 .btn {
+  position: relative; overflow: hidden;
   display: inline-flex; align-items: center; gap: 8px; justify-content: center;
   padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border);
   background: var(--surface-2); color: var(--text); font-size: 0.95rem;
@@ -153,6 +154,7 @@ tr:last-child td { border-bottom: none; }
 /* Misc */
 .muted { color: var(--muted); }
 .center { text-align: center; }
+code { background: rgba(255,255,255,.08); padding: 2px 7px; border-radius: 6px; font-size: .85em; border: 1px solid var(--border); }
 .alert { padding: 12px 15px; border-radius: 11px; font-size: 0.9rem; margin-bottom: 14px; }
 .alert.error { background: rgba(255,77,109,.14); border: 1px solid rgba(255,77,109,.4); color: #ffc2cd; }
 .alert.ok { background: rgba(52,226,155,.14); border: 1px solid rgba(52,226,155,.4); color: #b6f5da; }
@@ -181,3 +183,65 @@ tr:last-child td { border-bottom: none; }
 /* Scrollbar discrète */
 ::-webkit-scrollbar { height: 10px; width: 10px; }
 ::-webkit-scrollbar-thumb { background: var(--border-glow); border-radius: 10px; }
+
+/* ===================== Effets "extra" ===================== */
+
+/* Orbes lumineux flottants en fond (toute l'app) */
+body::before, body::after {
+  content: ""; position: fixed; z-index: -1; border-radius: 50%;
+  filter: blur(80px); opacity: .55; pointer-events: none;
+  animation: drift 24s ease-in-out infinite;
+}
+body::before { width: 48vw; height: 48vw; left: -10vw; top: -12vw;
+  background: radial-gradient(circle, #ff2fb9, transparent 60%); }
+body::after { width: 44vw; height: 44vw; right: -12vw; top: -6vw;
+  background: radial-gradient(circle, #4f7bff, transparent 60%); animation-delay: -9s; }
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(5vw, 4vw) scale(1.1); }
+  66% { transform: translate(-4vw, 2vw) scale(.92); }
+}
+
+/* Titre en dégradé animé */
+.gradient-text {
+  background: linear-gradient(110deg, #fff, #ff2fb9, #b14bff, #4f7bff, #22d3ee, #fff);
+  background-size: 280% auto; -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; animation: flow 7s linear infinite;
+}
+@keyframes flow { to { background-position: 280% center; } }
+
+/* Reflet qui balaie les boutons principaux */
+.btn.primary::after {
+  content: ""; position: absolute; top: 0; left: -120%; width: 55%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.4), transparent);
+  transform: skewX(-20deg); animation: shine 3.6s ease-in-out infinite;
+}
+@keyframes shine { 0%, 60% { left: -120%; } 100% { left: 175%; } }
+
+/* Cartes : bordure dégradée lumineuse au survol (effet verre) */
+.card.hover::before {
+  content: ""; position: absolute; inset: 0; border-radius: var(--radius); padding: 1px;
+  background: linear-gradient(135deg, rgba(255,47,185,.7), transparent 40%, transparent 60%, rgba(79,123,255,.7));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity .2s;
+}
+.card.hover:hover::before { opacity: 1; }
+
+/* Balayage lumineux lent sur les hero */
+.hero::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.16) 48%, transparent 66%);
+  background-size: 250% 100%; animation: sheen 6s ease-in-out infinite;
+}
+@keyframes sheen { 0% { background-position: 180% 0; } 100% { background-position: -80% 0; } }
+
+/* Apparition à l'arrivée */
+.reveal { opacity: 0; transform: translateY(22px); animation: rise .8s cubic-bezier(.2,.7,.2,1) forwards; }
+@keyframes rise { to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after, .gradient-text, .btn.primary::after, .hero::before, .reveal {
+    animation: none;
+  }
+  .reveal { opacity: 1; transform: none; }
+}

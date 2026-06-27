@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { PlainLayout } from "../components/Layout";
-import { THEMES, themeHeroStyle } from "../lib/themes";
+import { THEMES } from "../lib/themes";
 
 const FEATURES: [string, string, string][] = [
   ["🎟️", "Billets signés", "Tokens HMAC opaques, impossibles à falsifier."],
@@ -14,26 +14,24 @@ const FEATURES: [string, string, string][] = [
 export default function Landing() {
   return (
     <PlainLayout>
-      <div className="hero center" style={{ ...themeHeroStyle(null), marginTop: 24, padding: "44px 32px" }}>
-        <h1 style={{ fontSize: "2.4rem", color: "#fff", textShadow: "0 2px 14px rgba(0,0,0,.25)" }}>
-          Vos événements, vos QR codes, vos entrées.
+      <div className="hero center reveal" style={{
+        marginTop: 24, padding: "56px 32px",
+        background: "linear-gradient(135deg, rgba(255,47,185,.14), rgba(79,123,255,.14)), #0c0c16",
+      }}>
+        <span className="kicker">🎟️ Billetterie & contrôle d'accès</span>
+        <h1 style={{ fontSize: "clamp(2.2rem,6vw,3.4rem)", marginTop: 16 }}>
+          Vos événements.<br /><span className="gradient-text">Vos QR. Vos entrées.</span>
         </h1>
-        <p style={{ maxWidth: 580, margin: "12px auto 24px", color: "rgba(255,255,255,.92)" }}>
+        <p style={{ maxWidth: 580, margin: "12px auto 26px" }}>
           Créez un événement, générez des billets QR signés <em>ou</em> ouvrez l'inscription
           en ligne, puis scannez les entrées depuis votre téléphone — sans double scan,
           en temps réel.
         </p>
         <div className="row" style={{ justifyContent: "center" }}>
-          <Link to="/app/register" className="btn"
-            style={{ background: "#fff", color: "#1a1130", border: "none", fontWeight: 700 }}>
-            Créer un compte organisateur
-          </Link>
-          <Link to="/app/login" className="btn"
-            style={{ background: "rgba(255,255,255,.16)", color: "#fff", border: "1px solid rgba(255,255,255,.5)" }}>
-            Se connecter
-          </Link>
+          <Link to="/app/register" className="btn primary">Créer un compte organisateur</Link>
+          <Link to="/app/login" className="btn">Se connecter</Link>
         </div>
-        <p style={{ fontSize: ".8rem", marginTop: 16, color: "rgba(255,255,255,.85)" }}>
+        <p className="muted" style={{ fontSize: ".8rem", marginTop: 16 }}>
           Démo : <code>demo@qrevents.app</code> / <code>demo12345</code>
         </p>
       </div>
@@ -41,9 +39,9 @@ export default function Landing() {
       <h2 style={{ marginBottom: 14 }}>Tout ce qu'il faut pour gérer l'accès</h2>
       <div className="grid cols-3" style={{ marginBottom: 32 }}>
         {FEATURES.map(([icon, title, desc]) => (
-          <div className="card" key={title}>
-            <div style={{ fontSize: 26 }}>{icon}</div>
-            <h3 style={{ marginTop: 8 }}>{title}</h3>
+          <div className="card hover" key={title}>
+            <div style={{ fontSize: 28 }}>{icon}</div>
+            <h3 style={{ marginTop: 10 }}>{title}</h3>
             <p style={{ margin: 0 }}>{desc}</p>
           </div>
         ))}
@@ -68,7 +66,7 @@ export default function Landing() {
           ["2", "Billets & inscriptions", "Générez des lots de billets et/ou partagez la page publique."],
           ["3", "Scannez les entrées", "Installez l'APK, connectez la porte par code, c'est parti."],
         ].map(([n, title, desc]) => (
-          <div className="card" key={n}>
+          <div className="card hover" key={n}>
             <div className="brand-logo" style={{ fontSize: 15 }}>{n}</div>
             <h3 style={{ marginTop: 10 }}>{title}</h3>
             <p style={{ margin: 0 }}>{desc}</p>

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import type { EventRow } from "../lib/types";
 import { formatDate, MODE_LABELS } from "../lib/format";
-import { themeOf } from "../lib/themes";
+import { themeOf, themeGradient } from "../lib/themes";
 import { EventBadge, Empty, Spinner } from "../components/ui";
 
 export default function EventsList() {
@@ -44,6 +44,9 @@ export default function EventsList() {
                 {formatDate(ev.date)} · {ev.location || "Lieu non défini"}
               </p>
               <div className="row wrap" style={{ gap: 8 }}>
+                <span className="badge" style={{ background: themeGradient(ev.theme), color: "#fff", border: "none" }}>
+                  {th.emoji} {th.label}
+                </span>
                 <span className="badge violet">{MODE_LABELS[ev.registration_mode]}</span>
                 <span className="badge">{ev.tickets_count ?? 0} billet(s)</span>
                 {ev.capacity != null && <span className="badge">cap. {ev.capacity}</span>}

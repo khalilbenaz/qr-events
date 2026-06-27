@@ -9,14 +9,16 @@ mobile de scan. Tout tient dans le **free tier Cloudflare**.
 |---|---|
 | 🌐 Web (dashboard + pages publiques) | https://khalilbenaz.github.io/qr-events/ |
 | ⚙️ API (Cloudflare Worker) | https://qr-events-api.khalilbenaz.workers.dev |
-| 📱 Mobile | APK Android — `flutter build apk --release` |
+| 📱 Mobile (APK) | [Dernière release GitHub](https://github.com/khalilbenaz/qr-events/releases/latest) |
+
+> 🧪 **Compte démo** : `demo@qrevents.app` / `demo12345` (dashboard organisateur).
 
 📖 Docs : [Architecture](docs/ARCHITECTURE.md) · [Déploiement](docs/DEPLOYMENT.md)
 
 ```
-api/     Cloudflare Workers + Hono + D1 + KV   ← Étape 1 (fait)
-web/     React + Vite (dashboard + pages)      ← Étape 2/3 (à venir)
-mobile/  Flutter Android (scan)                ← Étape 4 (à venir)
+api/     Cloudflare Workers + Hono + D1 + KV   ← Étape 1 ✅
+web/     React + Vite (dashboard + pages)      ← Étapes 2 & 3 ✅
+mobile/  Flutter Android (scan)                ← Étape 4 ✅
 ```
 
 ## État
@@ -34,6 +36,17 @@ mobile/  Flutter Android (scan)                ← Étape 4 (à venir)
   validation `/scan` (`dio`) avec feedback couleur/son/vibration, compteur d'entrées
   temps réel, **mode offline** (cache `sqflite` + file de scans + sync auto au retour
   réseau). Build : `flutter build apk --release`.
+
+### Fonctionnalités additionnelles
+- 🎟️ **Deux façons d'obtenir un billet, en parallèle** : génération manuelle de lots
+  par l'organisateur **et** inscription publique en ligne (sur le même événement).
+- 🏷️ **Catégories de billets** (ex. Standard / VIP / Presse) définies par l'organisateur,
+  proposées au choix à l'inscription et validées côté API.
+- 🎨 **Thèmes d'événement** (concert, conférence, fête, sport, mariage, expo, atelier,
+  gala, festival…) : couleurs + emoji appliqués aux cartes et à la page publique.
+- 🔄 **Suivi d'inscription** (mode `approval`) : l'inscrit reçoit un lien permanent
+  `/ticket/:token` ; dès que l'organisateur valide, son QR apparaît (page auto-rafraîchie).
+- 📦 **APK publié en GitHub Release** à chaque tag `v*`.
 
 ## Décisions techniques
 
@@ -81,11 +94,14 @@ npm run dev                 # http://localhost:5173
 ```
 
 Routes : `/` (accueil), `/app/login` · `/app/events` (dashboard organisateur),
-`/{org-slug}/{event-slug}` (page publique d'inscription).
+`/{org-slug}/{event-slug}` (page publique), `/ticket/:token` (suivi d'un billet).
 
-Déploiement Cloudflare Pages : build `npm run build`, dossier de sortie `dist`,
-variable `VITE_API_URL` = URL du Worker. Le fichier `public/_redirects` assure le
-fallback SPA. Pensez à ajouter l'origine Pages dans `ALLOWED_ORIGINS` de l'API.
+**Déploiement actuel : GitHub Pages** (automatique). À chaque push sur `main`
+touchant `web/**`, le workflow [`deploy-pages.yml`](.github/workflows/deploy-pages.yml)
+build avec `VITE_BASE=/qr-events/` + `VITE_API_URL` (variable de dépôt) et publie.
+L'origine `https://khalilbenaz.github.io` est déjà dans `ALLOWED_ORIGINS` de l'API.
+Voir [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). _(Alternative pour garder le repo privé :
+Cloudflare Pages — `public/_redirects` fournit déjà le fallback SPA.)_
 
 ## App mobile (Flutter, Android)
 
@@ -130,7 +146,7 @@ Réponse uniforme : `{ ok: true, data }` ou `{ ok: false, error: { code, message
 | Méthode | Route | Description |
 |---|---|---|
 | GET | `/events` | Mes événements (+ nb billets) |
-| POST | `/events` | Créer `{ slug, name, registration_mode, capacity, ... }` |
+| POST | `/events` | Créer `{ slug, name, registration_mode, capacity, theme, categories, ... }` |
 | GET | `/events/:id` | Détail |
 | PATCH | `/events/:id` | Éditer (incl. `status: published`) |
 | DELETE | `/events/:id` | Supprimer |
@@ -163,7 +179,7 @@ Réponse uniforme : `{ ok: true, data }` ou `{ ok: false, error: { code, message
 | Méthode | Route | Description |
 |---|---|---|
 | GET | `/public/event/:orgSlug/:eventSlug` | Landing (capacité restante) |
-| POST | `/public/event/:orgSlug/:eventSlug/register` | Inscription (`open`→valid, `approval`→pending) |
+| POST | `/public/event/:orgSlug/:eventSlug/register` | Inscription `{ name, email, category? }` (`open`→valid, `approval`→pending) |
 | GET | `/public/ticket/:token` | Statut d'un billet + QR si validé (suivi inscription) |
 | GET | `/public/t/:token/qr` | Image SVG du QR |
 

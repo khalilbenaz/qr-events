@@ -5,7 +5,7 @@ import type { PublicEvent as PublicEventT } from "../lib/types";
 import { PlainLayout } from "../components/Layout";
 import { Alert, Field, Spinner } from "../components/ui";
 import { formatDate, MODE_LABELS } from "../lib/format";
-import { themeOf, themeGradient } from "../lib/themes";
+import { themeOf, themeHeroStyle } from "../lib/themes";
 
 interface RegResult {
   status: "valid" | "pending";
@@ -35,10 +35,14 @@ export default function PublicEvent() {
     <PlainLayout>
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
         {ev.cover_image_url && <img className="cover" src={ev.cover_image_url} alt="" />}
-        <div className="hero" style={{ background: themeGradient(ev.theme), border: "none", color: "#fff" }}>
-          <div style={{ fontSize: 40, lineHeight: 1 }}>{themeOf(ev.theme).emoji}</div>
-          <h1 style={{ color: "#fff", marginTop: 8 }}>{ev.name}</h1>
-          <p style={{ margin: "4px 0", color: "rgba(255,255,255,.9)" }}>
+        <div className="hero" style={themeHeroStyle(ev.theme)}>
+          <span className="badge" style={{
+            background: "rgba(255,255,255,.22)", color: "#fff", border: "none", backdropFilter: "blur(4px)",
+          }}>
+            {themeOf(ev.theme).emoji} {themeOf(ev.theme).label}
+          </span>
+          <h1 style={{ color: "#fff", marginTop: 12, textShadow: "0 2px 12px rgba(0,0,0,.25)" }}>{ev.name}</h1>
+          <p style={{ margin: "4px 0", color: "rgba(255,255,255,.92)" }}>
             📅 {formatDate(ev.date)}{ev.location && <>  ·  📍 {ev.location}</>}
           </p>
           {ev.capacity != null && (

@@ -153,12 +153,14 @@ pub.get("/ticket/:token", async (c) => {
 
   const t = await c.env.DB.prepare(
     `SELECT t.status, t.holder_name, t.category,
-            e.name AS event_name, e.date AS event_date, e.location AS event_location
+            e.name AS event_name, e.date AS event_date, e.location AS event_location,
+            e.theme AS event_theme
        FROM tickets t JOIN events e ON e.id = t.event_id
       WHERE t.id = ? AND t.qr_token = ?`
   ).bind(ticketId, token).first<{
     status: string; holder_name: string | null; category: string;
     event_name: string; event_date: string | null; event_location: string | null;
+    event_theme: string | null;
   }>();
   if (!t) throw new ApiError(404, "not_found", "Billet introuvable");
 
@@ -167,7 +169,7 @@ pub.get("/ticket/:token", async (c) => {
     status: t.status,
     holder_name: t.holder_name,
     category: t.category,
-    event: { name: t.event_name, date: t.event_date, location: t.event_location },
+    event: { name: t.event_name, date: t.event_date, location: t.event_location, theme: t.event_theme },
     qr: usable ? await qrDataUri(token) : null,
   });
 });

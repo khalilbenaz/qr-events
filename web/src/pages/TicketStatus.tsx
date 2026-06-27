@@ -5,12 +5,13 @@ import type { TicketStatus as TStatus } from "../lib/types";
 import { PlainLayout } from "../components/Layout";
 import { Spinner } from "../components/ui";
 import { formatDate } from "../lib/format";
+import { themeOf, themeHeroStyle } from "../lib/themes";
 
 interface TicketView {
   status: TStatus;
   holder_name: string | null;
   category: string;
-  event: { name: string; date: string | null; location: string | null };
+  event: { name: string; date: string | null; location: string | null; theme: string | null };
   qr: string | null;
 }
 
@@ -46,9 +47,10 @@ export default function TicketStatus() {
   return (
     <PlainLayout>
       <div style={{ maxWidth: 480, margin: "0 auto" }}>
-        <div className="hero" style={{ textAlign: "center" }}>
-          <h1 style={{ marginBottom: 4 }}>{t.event.name}</h1>
-          <p style={{ margin: 0 }}>
+        <div className="hero" style={{ ...themeHeroStyle(t.event.theme), textAlign: "center" }}>
+          <div style={{ fontSize: 34 }}>{themeOf(t.event.theme).emoji}</div>
+          <h1 style={{ marginBottom: 4, color: "#fff", textShadow: "0 2px 12px rgba(0,0,0,.25)" }}>{t.event.name}</h1>
+          <p style={{ margin: 0, color: "rgba(255,255,255,.92)" }}>
             📅 {formatDate(t.event.date)}{t.event.location && <>  ·  📍 {t.event.location}</>}
           </p>
         </div>

@@ -73,41 +73,46 @@ export function VenueMap({ location, accent }: { location: string; accent: strin
   );
 }
 
-/* ------- Bloc inscription (places + formulaire / billet) ------- */
+/* ------- Bloc réservation (style billetterie : places + formulaire / billet) ------- */
 export function RegistrationCard({ ev, orgSlug, eventSlug, result, setResult }: TemplateProps) {
-  if (result) return <div className="card panel"><ResultView result={result} /></div>;
-
-  if (ev.registration_mode === "none")
-    return (
-      <div className="card panel center">
-        <h2>Billets</h2>
-        <p style={{ margin: 0 }}>Les billets sont distribués directement par l'organisateur.</p>
-      </div>
+  let inner;
+  if (result) inner = <ResultView result={result} />;
+  else if (ev.registration_mode === "none")
+    inner = <div className="center"><h2>Billets</h2>
+      <p style={{ margin: 0 }}>Les billets sont distribués directement par l'organisateur.</p></div>;
+  else if (ev.soldOut)
+    inner = <div className="center"><h2>Complet 😢</h2>
+      <p style={{ margin: 0 }}>Plus de places disponibles.</p></div>;
+  else
+    inner = (
+      <>
+        {ev.capacity != null && (
+          <div style={{ marginBottom: 18 }}>
+            <div className="row" style={{ marginBottom: 6 }}>
+              <strong style={{ fontSize: "1.1rem" }}>{ev.remaining}</strong>
+              <span className="muted">places restantes / {ev.capacity}</span>
+            </div>
+            <div className="progress">
+              <div style={{ width: `${Math.min(100, ((ev.capacity - (ev.remaining ?? 0)) / ev.capacity) * 100)}%` }} />
+            </div>
+          </div>
+        )}
+        <RegisterForm orgSlug={orgSlug} eventSlug={eventSlug}
+          mode={ev.registration_mode} categories={ev.categories} onDone={setResult} />
+      </>
     );
-  if (ev.soldOut)
-    return (
-      <div className="card panel center">
-        <h2>Complet</h2>
-        <p style={{ margin: 0 }}>Plus de places disponibles.</p>
-      </div>
-    );
 
+  return <div id="reserver" className="card panel ticket-panel">{inner}</div>;
+}
+
+/* ------- Barre « Réserver » collante (mobile) ------- */
+export function MobileReserveBar({ ev, result }: { ev: PublicEvent; result: RegResult | null }) {
+  if (result || ev.registration_mode === "none" || ev.soldOut) return null;
   return (
-    <div className="card panel">
-      {ev.capacity != null && (
-        <div style={{ marginBottom: 18 }}>
-          <div className="row" style={{ marginBottom: 6 }}>
-            <strong>{ev.remaining}</strong>
-            <span className="muted">places restantes / {ev.capacity}</span>
-          </div>
-          <div className="progress">
-            <div style={{ width: `${Math.min(100, ((ev.capacity - (ev.remaining ?? 0)) / ev.capacity) * 100)}%` }} />
-          </div>
-        </div>
-      )}
-      <RegisterForm orgSlug={orgSlug} eventSlug={eventSlug}
-        mode={ev.registration_mode} categories={ev.categories} onDone={setResult} />
-    </div>
+    <a href="#reserver" className="reserve-bar">
+      <span>{ev.capacity != null ? `${ev.remaining} places · ` : ""}Réserver ma place</span>
+      <span className="rb-cta">Réserver →</span>
+    </a>
   );
 }
 
@@ -150,7 +155,7 @@ function RegisterForm({
           </select>
         </Field>
       )}
-      <button className="btn primary block" disabled={busy}>{busy ? "Envoi…" : "S'inscrire"}</button>
+      <button className="btn primary block" disabled={busy}>{busy ? "Envoi…" : "🎟️ Réserver ma place"}</button>
     </form>
   );
 }

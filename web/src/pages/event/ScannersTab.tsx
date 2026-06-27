@@ -45,16 +45,16 @@ export default function ScannersTab({ ev }: { ev: EventRow }) {
                 onChange={(e) => setName(e.target.value)} />
             </Field>
           </div>
-          {cats.length > 0 && (
-            <div style={{ width: 200 }}>
-              <Field label="Catégorie acceptée">
-                <select value={category} onChange={(e) => setCategory(e.target.value)}>
-                  <option value="">Toutes</option>
-                  {cats.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </Field>
-            </div>
-          )}
+          <div style={{ width: 220 }}>
+            <Field label="Catégorie acceptée"
+              hint={cats.length ? undefined : "Aucune catégorie sur cet événement — ajoutez-en dans l'onglet Infos pour dédier une porte."}>
+              <select value={category} disabled={cats.length === 0}
+                onChange={(e) => setCategory(e.target.value)}>
+                <option value="">Toutes catégories</option>
+                {cats.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </Field>
+          </div>
           <div style={{ marginBottom: 14 }}>
             <button className="btn primary" disabled={busy}>{busy ? "…" : "Créer"}</button>
           </div>

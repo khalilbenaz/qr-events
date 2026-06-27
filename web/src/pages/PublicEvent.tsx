@@ -5,6 +5,7 @@ import type { PublicEvent as PublicEventT } from "../lib/types";
 import { PlainLayout } from "../components/Layout";
 import { Spinner } from "../components/ui";
 import { EventTemplate, type RegResult } from "./public/templates";
+import { MobileReserveBar } from "./public/shared";
 
 export default function PublicEvent() {
   const { orgSlug, eventSlug } = useParams();
@@ -26,6 +27,7 @@ export default function PublicEvent() {
     <PlainLayout>
       <EventTemplate ev={ev} orgSlug={orgSlug!} eventSlug={eventSlug!}
         result={result} setResult={setResult} />
+      <MobileReserveBar ev={ev} result={result} />
     </PlainLayout>
   );
 }

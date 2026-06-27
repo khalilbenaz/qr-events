@@ -2,8 +2,20 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, ApiError } from "../../lib/api";
 import type { PublicEvent } from "../../lib/types";
+import type { EventCategory } from "../../lib/categories";
 import { Alert, Field } from "../../components/ui";
 import { MODE_LABELS } from "../../lib/format";
+
+/** Catégories ouvertes à l'auto-inscription (mode ≠ 'none'). */
+export const selectableCategories = (ev: PublicEvent): EventCategory[] =>
+  ev.categories.filter((c) => c.mode !== "none");
+
+/** L'événement accepte-t-il une inscription publique ? */
+export function canRegister(ev: PublicEvent): boolean {
+  if (ev.soldOut) return false;
+  if (ev.categories.length) return selectableCategories(ev).length > 0;
+  return ev.registration_mode !== "none";
+}
 
 export interface RegResult {
   status: "valid" | "pending";
@@ -77,12 +89,12 @@ export function VenueMap({ location, accent }: { location: string; accent: strin
 export function RegistrationCard({ ev, orgSlug, eventSlug, result, setResult }: TemplateProps) {
   let inner;
   if (result) inner = <ResultView result={result} />;
-  else if (ev.registration_mode === "none")
-    inner = <div className="center"><h2>Billets</h2>
-      <p style={{ margin: 0 }}>Les billets sont distribués directement par l'organisateur.</p></div>;
   else if (ev.soldOut)
     inner = <div className="center"><h2>Complet 😢</h2>
       <p style={{ margin: 0 }}>Plus de places disponibles.</p></div>;
+  else if (!canRegister(ev))
+    inner = <div className="center"><h2>Billets</h2>
+      <p style={{ margin: 0 }}>Les billets sont distribués directement par l'organisateur.</p></div>;
   else
     inner = (
       <>
@@ -98,7 +110,7 @@ export function RegistrationCard({ ev, orgSlug, eventSlug, result, setResult }: 
           </div>
         )}
         <RegisterForm orgSlug={orgSlug} eventSlug={eventSlug}
-          mode={ev.registration_mode} categories={ev.categories} onDone={setResult} />
+          mode={ev.registration_mode} categories={selectableCategories(ev)} onDone={setResult} />
       </>
     );
 
@@ -107,7 +119,7 @@ export function RegistrationCard({ ev, orgSlug, eventSlug, result, setResult }: 
 
 /* ------- Barre « Réserver » collante (mobile) ------- */
 export function MobileReserveBar({ ev, result }: { ev: PublicEvent; result: RegResult | null }) {
-  if (result || ev.registration_mode === "none" || ev.soldOut) return null;
+  if (result || !canRegister(ev)) return null;
   return (
     <a href="#reserver" className="reserve-bar">
       <span>{ev.capacity != null ? `${ev.remaining} places · ` : ""}Réserver ma place</span>
@@ -119,14 +131,19 @@ export function MobileReserveBar({ ev, result }: { ev: PublicEvent; result: RegR
 function RegisterForm({
   orgSlug, eventSlug, mode, categories, onDone,
 }: {
-  orgSlug: string; eventSlug: string; mode: string; categories: string[];
+  orgSlug: string; eventSlug: string; mode: string; categories: EventCategory[];
   onDone: (r: RegResult) => void;
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [category, setCategory] = useState(categories[0] ?? "");
+  const [category, setCategory] = useState(categories[0]?.name ?? "");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // Mode effectif : celui de la catégorie choisie, sinon celui de l'événement.
+  const effMode = categories.length
+    ? categories.find((c) => c.name === category)?.mode ?? "open"
+    : (mode as "open" | "approval");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setBusy(true); setErr("");
@@ -144,16 +161,25 @@ function RegisterForm({
   return (
     <form onSubmit={submit}>
       <h2 style={{ marginBottom: 2 }}>Réserver ma place</h2>
-      <p style={{ marginTop: 0, fontSize: ".88rem" }}>{MODE_LABELS[mode as "open" | "approval"]}</p>
+      <p style={{ marginTop: 0, fontSize: ".88rem" }}>{MODE_LABELS[effMode]}</p>
       {err && <Alert kind="error">{err}</Alert>}
       <Field label="Nom complet"><input value={name} required onChange={(e) => setName(e.target.value)} /></Field>
       <Field label="Email"><input type="email" value={email} required onChange={(e) => setEmail(e.target.value)} /></Field>
       {categories.length > 0 && (
         <Field label="Catégorie">
           <select value={category} onChange={(e) => setCategory(e.target.value)} required>
-            {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+            {categories.map((c) => (
+              <option key={c.name} value={c.name}>
+                {c.name}{c.mode === "approval" ? " — validation requise" : ""}
+              </option>
+            ))}
           </select>
         </Field>
+      )}
+      {effMode === "approval" && (
+        <p className="muted" style={{ fontSize: ".82rem", marginTop: -4 }}>
+          ⏳ Cette catégorie nécessite une validation de l'organisateur avant l'émission du billet.
+        </p>
       )}
       <button className="btn primary block" disabled={busy}>{busy ? "Envoi…" : "🎟️ Réserver ma place"}</button>
     </form>

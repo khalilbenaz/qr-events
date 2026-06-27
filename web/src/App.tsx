@@ -10,6 +10,7 @@ import EventsList from "./pages/EventsList";
 import EventNew from "./pages/EventNew";
 import EventDetail from "./pages/EventDetail";
 import PublicEvent from "./pages/PublicEvent";
+import OrgEvents from "./pages/OrgEvents";
 import TicketStatus from "./pages/TicketStatus";
 import NotFound from "./pages/NotFound";
 import PendingScreen from "./pages/PendingScreen";
@@ -42,6 +43,8 @@ export default function App() {
       {/* Suivi d'un billet (récupération du QR après validation) */}
       <Route path="/ticket/:token" element={<TicketStatus />} />
 
+      {/* Page organisateur : /{organizer-slug} (liste des événements) */}
+      <Route path="/:orgSlug" element={<OrgEvents />} />
       {/* Pages publiques d'événement : /{organizer-slug}/{event-slug} */}
       <Route path="/:orgSlug/:eventSlug" element={<PublicEvent />} />
 

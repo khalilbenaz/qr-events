@@ -77,7 +77,7 @@ export interface PublicEvent {
   cover_image_url: string | null;
   registration_mode: RegistrationMode;
   capacity: number | null;
-  categories: string[];
+  categories: { name: string; mode: RegistrationMode }[];
   theme: string | null;
   organizer: string;
   remaining: number | null;

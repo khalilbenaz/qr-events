@@ -54,12 +54,33 @@ pub.get("/event/:orgSlug/:eventSlug", async (c) => {
   });
 });
 
+// GET /public/org/:orgSlug — page organisateur : ses événements publiés
+pub.get("/org/:orgSlug", async (c) => {
+  const org = await c.env.DB.prepare(
+    "SELECT id, name, slug FROM organizers WHERE slug = ?"
+  ).bind(c.req.param("orgSlug")).first<{ id: string; name: string; slug: string }>();
+  if (!org) throw new ApiError(404, "not_found", "Organisateur introuvable");
+
+  const { results } = await c.env.DB.prepare(
+    `SELECT e.slug, e.name, e.description, e.date, e.location, e.cover_image_url,
+            e.theme, e.capacity,
+            (SELECT COUNT(*) FROM tickets t WHERE t.event_id = e.id AND t.status <> 'revoked') AS used
+       FROM events e
+      WHERE e.organizer_id = ? AND e.status = 'published'
+      ORDER BY (e.date IS NULL), e.date`
+  ).bind(org.id).all();
+
+  return ok(c, { organizer: org.name, slug: org.slug, events: results });
+});
+
 // POST /public/event/:orgSlug/:eventSlug/register — inscription publique optionnelle
 //   body: { name, email, category? }
 pub.post("/event/:orgSlug/:eventSlug/register", async (c) => {
   const ev = await resolvePublicEvent(c, c.req.param("orgSlug"), c.req.param("eventSlug"));
+  const allowed = parseCategories(ev.categories);
 
-  if (ev.registration_mode === "none")
+  // Bloque tôt seulement s'il n'y a NI catégories NI inscription au niveau événement.
+  if (allowed.length === 0 && ev.registration_mode === "none")
     throw new ApiError(403, "registration_closed", "Inscription non disponible");
 
   await rateLimit(c, "register_public", clientKey(c), 15, 600);
@@ -82,21 +103,24 @@ pub.post("/event/:orgSlug/:eventSlug/register", async (c) => {
   if (existing)
     throw new ApiError(409, "already_registered", "Déjà inscrit avec cet email");
 
-  // Catégorie : si l'événement définit une liste, la sélection doit en faire partie.
-  const allowed = parseCategories(ev.categories);
+  // Catégorie + mode d'inscription PROPRE à la catégorie (sinon mode événement).
   let category: string;
+  let mode = ev.registration_mode;
   if (allowed.length > 0) {
     const chosen = (b.category ?? "").trim();
-    const match = allowed.find((x) => x.toLowerCase() === chosen.toLowerCase());
-    if (match) category = match;
-    else if (!chosen && allowed.length === 1) category = allowed[0];
-    else throw new ApiError(400, "invalid_category", "Catégorie invalide ou manquante");
+    const match = allowed.find((x) => x.name.toLowerCase() === chosen.toLowerCase())
+      ?? (!chosen && allowed.length === 1 ? allowed[0] : null);
+    if (!match) throw new ApiError(400, "invalid_category", "Catégorie invalide ou manquante");
+    if (match.mode === "none")
+      throw new ApiError(403, "registration_closed", `La catégorie « ${match.name} » n'est pas ouverte à l'inscription`);
+    category = match.name;
+    mode = match.mode;
   } else {
     category = (b.category ?? "standard").trim() || "standard";
   }
 
   // Mode 'approval' → pending (l'organisateur valide) ; 'open' → valid direct.
-  const status = ev.registration_mode === "approval" ? "pending" : "valid";
+  const status = mode === "approval" ? "pending" : "valid";
   const id = newId();
   const qr_token = await signQrToken(id, c.env.QR_HMAC_SECRET);
 

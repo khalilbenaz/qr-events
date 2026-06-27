@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { sign } from "hono/jwt";
 import type { AppEnv } from "../types";
 import { newId, newAccessCode } from "../lib/crypto";
+import { categoryNames } from "../lib/categories";
 import { ApiError, ok } from "../lib/response";
 import { getOwnedEvent } from "../middleware/tenant";
 import { rateLimit, clientKey } from "../middleware/ratelimit";
@@ -37,7 +38,7 @@ scannersAdmin.post("/events/:eventId/scanners", async (c) => {
     throw new ApiError(400, "invalid_name", "Nom du scanner requis");
 
   // Catégorie acceptée (optionnelle) : doit faire partie des catégories de l'événement.
-  const allowed = (ev.categories ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  const allowed = categoryNames(ev.categories);
   let cat: string | null = (category ?? "").trim() || null;
   if (cat) {
     const match = allowed.find((x) => x.toLowerCase() === cat!.toLowerCase());

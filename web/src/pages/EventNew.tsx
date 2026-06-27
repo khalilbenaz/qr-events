@@ -6,6 +6,8 @@ import { MODE_LABELS } from "../lib/format";
 import { THEMES, themeGradient } from "../lib/themes";
 import { Alert, Field } from "../components/ui";
 import { LocationField } from "../components/LocationField";
+import { CategoriesEditor } from "../components/CategoriesEditor";
+import type { EventCategory } from "../lib/categories";
 
 const slugify = (s: string) =>
   s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
@@ -16,8 +18,9 @@ export default function EventNew() {
   const [f, setF] = useState({
     name: "", slug: "", description: "", date: "", location: "",
     cover_image_url: "", registration_mode: "none" as RegistrationMode, capacity: "",
-    categories: "", theme: "",
+    theme: "",
   });
+  const [cats, setCats] = useState<EventCategory[]>([]);
   const [slugEdited, setSlugEdited] = useState(false);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
@@ -38,7 +41,7 @@ export default function EventNew() {
           cover_image_url: f.cover_image_url || null,
           registration_mode: f.registration_mode,
           capacity: f.capacity ? Number(f.capacity) : null,
-          categories: f.categories || null,
+          categories: cats.filter((c) => c.name.trim()),
           theme: f.theme || null,
         },
       });
@@ -84,10 +87,7 @@ export default function EventNew() {
             <input value={f.cover_image_url} placeholder="https://…"
               onChange={(e) => set("cover_image_url", e.target.value)} />
           </Field>
-          <Field label="Catégories de billets" hint="Séparées par des virgules (ex: Standard, VIP, Presse). Vide = catégorie unique.">
-            <input value={f.categories} placeholder="Standard, VIP, Presse"
-              onChange={(e) => set("categories", e.target.value)} />
-          </Field>
+          <CategoriesEditor value={cats} onChange={setCats} />
           <div className="row" style={{ gap: 14, alignItems: "flex-start" }}>
             <div style={{ flex: 1 }}>
               <Field label="Mode d'inscription">

@@ -52,7 +52,9 @@ mobile/  Flutter Android (scan)                ← Étape 4 ✅
   (ex. porte VIP) ; un billet d'une autre catégorie est refusé (`wrong_category`) sans être consommé.
 - 🎟️ **Deux façons d'obtenir un billet, en parallèle** : génération manuelle de lots
   par l'organisateur **et** inscription publique en ligne (sur le même événement).
-- 🏷️ **Catégories de billets** (ex. Standard / VIP / Presse) proposées au choix à l'inscription.
+- 🏷️ **Catégories de billets** (ex. Standard / VIP / Presse) avec **mode d'inscription par
+  catégorie** : chaque catégorie peut être *libre*, *avec validation* ou *sur invitation* (fermée).
+- 🪧 **Page organisateur** `/{org-slug}` : grille d'affiches de tous ses événements publiés.
 - 🔄 **Suivi d'inscription** (mode `approval`) : lien permanent `/ticket/:token` ; dès validation,
   le QR apparaît (page auto-rafraîchie).
 - ⏳ **Compte à rebours** et **affiche de couverture** en hero.
@@ -217,7 +219,8 @@ Réponse uniforme : `{ ok: true, data }` ou `{ ok: false, error: { code, message
 ### Public (sans auth)
 | Méthode | Route | Description |
 |---|---|---|
-| GET | `/public/event/:orgSlug/:eventSlug` | Landing (capacité restante) |
+| GET | `/public/org/:orgSlug` | Page organisateur : ses événements publiés |
+| GET | `/public/event/:orgSlug/:eventSlug` | Landing (capacité restante, catégories+modes) |
 | POST | `/public/event/:orgSlug/:eventSlug/register` | Inscription `{ name, email, category? }` (`open`→valid, `approval`→pending) |
 | GET | `/public/ticket/:token` | Statut d'un billet + QR si validé (suivi inscription) |
 | GET | `/public/t/:token/qr` | Image SVG du QR |

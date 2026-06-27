@@ -275,6 +275,25 @@ body::after { width: 44vw; height: 44vw; right: -12vw; top: -6vw;
   .event { padding-bottom: 72px; } /* place pour la barre */
 }
 
+/* Grille d'affiches (page organisateur, style billetterie) */
+.poster-grid { display: grid; gap: 18px; margin-top: 22px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.poster { display: flex; flex-direction: column; border-radius: 16px; overflow: hidden;
+  border: 1px solid var(--border); background: linear-gradient(180deg, var(--surface), var(--bg-2));
+  transition: transform .18s, border-color .18s, box-shadow .18s; }
+.poster:hover { transform: translateY(-5px); border-color: var(--border-glow);
+  box-shadow: 0 22px 56px -24px rgba(177,75,255,.7); text-decoration: none; }
+.poster-img { position: relative; aspect-ratio: 3 / 4; background-size: cover; background-position: center; }
+.poster-theme { position: absolute; top: 10px; left: 10px; font-size: .7rem; font-weight: 800;
+  color: #fff; background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+  padding: 5px 10px; border-radius: 999px; }
+.poster-sold { position: absolute; top: 10px; right: 10px; font-size: .7rem; font-weight: 800;
+  color: #fff; background: var(--red); padding: 5px 10px; border-radius: 999px; }
+.poster-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.poster-body h3 { margin: 0 0 4px; font-size: 1.1rem; color: var(--text); }
+.poster-meta { margin: 0; font-size: .82rem; color: var(--muted); }
+.poster-cta { margin-top: auto; padding-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
 /* Affiche en bannière + en-tête (le texte ne chevauche jamais l'image) */
 .event-cover {
   display: block; width: 100%; height: clamp(200px, 36vw, 400px); object-fit: cover;

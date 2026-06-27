@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api, ApiError } from "../../lib/api";
 import type { EventRow, ScannerRow } from "../../lib/types";
 import { Alert, Empty, Field, Spinner } from "../../components/ui";
+import { categoryNames } from "../../lib/categories";
 
 export default function ScannersTab({ ev }: { ev: EventRow }) {
   const [scanners, setScanners] = useState<ScannerRow[] | null>(null);
@@ -10,7 +11,7 @@ export default function ScannersTab({ ev }: { ev: EventRow }) {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const cats = (ev.categories ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  const cats = categoryNames(ev.categories);
 
   const load = () =>
     api<ScannerRow[]>(`/events/${ev.id}/scanners`).then(setScanners).catch(() => setScanners([]));
@@ -38,16 +39,16 @@ export default function ScannersTab({ ev }: { ev: EventRow }) {
         <h3>Ajouter une porte / un scanner</h3>
         <p>Chaque porte reçoit un <strong>code d'accès</strong> à saisir dans l'app mobile pour scanner.</p>
         {err && <Alert kind="error">{err}</Alert>}
-        <div className="row" style={{ gap: 14, alignItems: "flex-end" }}>
-          <div style={{ flex: 1, maxWidth: 260 }}>
+        <div className="row wrap" style={{ gap: 14, alignItems: "flex-start" }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
             <Field label="Nom de la porte">
               <input value={name} required placeholder="Porte A, Entrée VIP…"
                 onChange={(e) => setName(e.target.value)} />
             </Field>
           </div>
-          <div style={{ width: 220 }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
             <Field label="Catégorie acceptée"
-              hint={cats.length ? undefined : "Aucune catégorie sur cet événement — ajoutez-en dans l'onglet Infos pour dédier une porte."}>
+              hint={cats.length ? "Vide = toutes les catégories." : "Aucune catégorie sur cet événement (onglet Infos pour en ajouter)."}>
               <select value={category} disabled={cats.length === 0}
                 onChange={(e) => setCategory(e.target.value)}>
                 <option value="">Toutes catégories</option>
@@ -55,10 +56,8 @@ export default function ScannersTab({ ev }: { ev: EventRow }) {
               </select>
             </Field>
           </div>
-          <div style={{ marginBottom: 14 }}>
-            <button className="btn primary" disabled={busy}>{busy ? "…" : "Créer"}</button>
-          </div>
         </div>
+        <button className="btn primary" disabled={busy}>{busy ? "…" : "Créer la porte"}</button>
       </form>
 
       {scanners === null ? <Spinner /> : scanners.length === 0 ? (

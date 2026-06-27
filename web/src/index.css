@@ -275,6 +275,13 @@ body::after { width: 44vw; height: 44vw; right: -12vw; top: -6vw;
   .event { padding-bottom: 72px; } /* place pour la barre */
 }
 
+/* Puces de filtre (home publique) */
+.chip-filter { padding: 8px 14px; border-radius: 999px; cursor: pointer; font-weight: 700;
+  font-size: .82rem; color: var(--muted); background: var(--surface-2);
+  border: 1px solid var(--border); transition: .15s; }
+.chip-filter:hover { color: #fff; border-color: var(--border-glow); }
+.chip-filter.on { color: #fff; }
+
 /* Grille d'affiches (page organisateur, style billetterie) */
 .poster-grid { display: grid; gap: 18px; margin-top: 22px;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }

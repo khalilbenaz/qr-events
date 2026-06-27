@@ -104,13 +104,19 @@ export default function InfoTab({ ev, onChange }: { ev: EventRow; onChange: () =
         </Field>
         <div className="row" style={{ gap: 14, alignItems: "flex-start" }}>
           <div style={{ flex: 1 }}>
-            <Field label="Mode d'inscription">
-              <select value={f.registration_mode}
-                onChange={(e) => set("registration_mode", e.target.value as RegistrationMode)}>
-                {(["none", "open", "approval"] as RegistrationMode[]).map((m) =>
-                  <option key={m} value={m}>{MODE_LABELS[m]}</option>)}
-              </select>
-            </Field>
+            {cats.length > 0 ? (
+              <Field label="Mode d'inscription" hint="Défini par catégorie ci-dessus.">
+                <input value="Par catégorie" disabled />
+              </Field>
+            ) : (
+              <Field label="Mode d'inscription">
+                <select value={f.registration_mode}
+                  onChange={(e) => set("registration_mode", e.target.value as RegistrationMode)}>
+                  {(["none", "open", "approval"] as RegistrationMode[]).map((m) =>
+                    <option key={m} value={m}>{MODE_LABELS[m]}</option>)}
+                </select>
+              </Field>
+            )}
           </div>
           <div style={{ flex: 1 }}>
             <Field label="Capacité" hint="Vide = illimité">

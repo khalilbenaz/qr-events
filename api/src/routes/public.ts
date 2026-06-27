@@ -54,6 +54,20 @@ pub.get("/event/:orgSlug/:eventSlug", async (c) => {
   });
 });
 
+// GET /public/events — tous les événements publiés à venir (toutes billetteries)
+pub.get("/events", async (c) => {
+  const { results } = await c.env.DB.prepare(
+    `SELECT e.slug, e.name, e.date, e.location, e.cover_image_url, e.theme, e.capacity,
+            (SELECT COUNT(*) FROM tickets t WHERE t.event_id = e.id AND t.status <> 'revoked') AS used,
+            o.name AS organizer, o.slug AS organizer_slug
+       FROM events e JOIN organizers o ON o.id = e.organizer_id
+      WHERE e.status = 'published' AND (e.date IS NULL OR e.date >= datetime('now', '-1 day'))
+      ORDER BY (e.date IS NULL), e.date
+      LIMIT 60`
+  ).all();
+  return ok(c, { events: results });
+});
+
 // GET /public/org/:orgSlug — page organisateur : ses événements publiés
 pub.get("/org/:orgSlug", async (c) => {
   const org = await c.env.DB.prepare(

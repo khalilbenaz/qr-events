@@ -3,7 +3,7 @@ import { useAuth } from "./auth/AuthContext";
 import { AppLayout } from "./components/Layout";
 import type { ReactNode } from "react";
 
-import Landing from "./pages/Landing";
+import PublicHome from "./pages/PublicHome";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import EventsList from "./pages/EventsList";
@@ -28,8 +28,8 @@ function Protected({ children }: { children: ReactNode }) {
 export default function App() {
   return (
     <Routes>
-      {/* Accueil */}
-      <Route path="/" element={<Landing />} />
+      {/* Accueil public : tous les événements à venir */}
+      <Route path="/" element={<PublicHome />} />
 
       {/* Dashboard organisateur */}
       <Route path="/app/login" element={<Login />} />

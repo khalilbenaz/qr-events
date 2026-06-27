@@ -14,8 +14,11 @@ mobile/  Flutter Android (scan)                ← Étape 4 (à venir)
 - ✅ **Étape 1 — Backend API** : auth JWT organisateur, isolation multi-tenant,
   CRUD events, génération de billets (token HMAC signé), `/scan` atomique
   anti-double-scan, scanners/portes, stats temps réel, pages publiques + inscription.
-- ⬜ Étape 2 — Pages publiques (web)
-- ⬜ Étape 3 — Dashboard organisateur (web)
+- ✅ **Étape 2 — Pages publiques** (`web/`) : landing `/{org-slug}/{event-slug}`,
+  inscription optionnelle (none/open/approval), affichage + lien du QR.
+- ✅ **Étape 3 — Dashboard organisateur** (`web/`) : login/register, liste &
+  CRUD events, génération de lots de billets + QR, validation des inscriptions,
+  révocation, scanners/portes, stats live (10 s) + affluence/heure, export CSV.
 - ⬜ Étape 4 — App mobile Flutter
 
 ## Décisions techniques
@@ -53,6 +56,22 @@ npx wrangler secret put QR_HMAC_SECRET
 npx wrangler d1 migrations apply qr-events --remote
 npm run deploy
 ```
+
+## Démarrage Web (dashboard + pages publiques)
+
+```bash
+cd web
+npm install
+cp .env.example .env        # VITE_API_URL=http://localhost:8787
+npm run dev                 # http://localhost:5173
+```
+
+Routes : `/` (accueil), `/app/login` · `/app/events` (dashboard organisateur),
+`/{org-slug}/{event-slug}` (page publique d'inscription).
+
+Déploiement Cloudflare Pages : build `npm run build`, dossier de sortie `dist`,
+variable `VITE_API_URL` = URL du Worker. Le fichier `public/_redirects` assure le
+fallback SPA. Pensez à ajouter l'origine Pages dans `ALLOWED_ORIGINS` de l'API.
 
 ---
 

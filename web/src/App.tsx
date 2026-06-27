@@ -10,6 +10,7 @@ import EventsList from "./pages/EventsList";
 import EventNew from "./pages/EventNew";
 import EventDetail from "./pages/EventDetail";
 import PublicEvent from "./pages/PublicEvent";
+import TicketStatus from "./pages/TicketStatus";
 import NotFound from "./pages/NotFound";
 
 function Protected({ children }: { children: ReactNode }) {
@@ -31,6 +32,9 @@ export default function App() {
       <Route path="/app/events" element={<Protected><EventsList /></Protected>} />
       <Route path="/app/events/new" element={<Protected><EventNew /></Protected>} />
       <Route path="/app/events/:id" element={<Protected><EventDetail /></Protected>} />
+
+      {/* Suivi d'un billet (récupération du QR après validation) */}
+      <Route path="/ticket/:token" element={<TicketStatus />} />
 
       {/* Pages publiques d'événement : /{organizer-slug}/{event-slug} */}
       <Route path="/:orgSlug/:eventSlug" element={<PublicEvent />} />

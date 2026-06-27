@@ -157,8 +157,9 @@ Réponse uniforme : `{ ok: true, data }` ou `{ ok: false, error: { code, message
 ### Public (sans auth)
 | Méthode | Route | Description |
 |---|---|---|
-| GET | `/public/:orgSlug/:eventSlug` | Landing (capacité restante) |
-| POST | `/public/:orgSlug/:eventSlug/register` | Inscription (`open`→valid, `approval`→pending) |
+| GET | `/public/event/:orgSlug/:eventSlug` | Landing (capacité restante) |
+| POST | `/public/event/:orgSlug/:eventSlug/register` | Inscription (`open`→valid, `approval`→pending) |
+| GET | `/public/ticket/:token` | Statut d'un billet + QR si validé (suivi inscription) |
 | GET | `/public/t/:token/qr` | Image SVG du QR |
 
 ## Sécurité

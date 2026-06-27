@@ -33,8 +33,8 @@ async function remainingCapacity(c: AppContext, ev: EventRow): Promise<number | 
   return Math.max(0, ev.capacity - (row?.c ?? 0));
 }
 
-// GET /public/:orgSlug/:eventSlug — landing publique
-pub.get("/:orgSlug/:eventSlug", async (c) => {
+// GET /public/event/:orgSlug/:eventSlug — landing publique
+pub.get("/event/:orgSlug/:eventSlug", async (c) => {
   const ev = await resolvePublicEvent(c, c.req.param("orgSlug"), c.req.param("eventSlug"));
   const remaining = await remainingCapacity(c, ev);
   return ok(c, {
@@ -50,9 +50,9 @@ pub.get("/:orgSlug/:eventSlug", async (c) => {
   });
 });
 
-// POST /public/:orgSlug/:eventSlug/register — inscription publique optionnelle
+// POST /public/event/:orgSlug/:eventSlug/register — inscription publique optionnelle
 //   body: { name, email, category? }
-pub.post("/:orgSlug/:eventSlug/register", async (c) => {
+pub.post("/event/:orgSlug/:eventSlug/register", async (c) => {
   const ev = await resolvePublicEvent(c, c.req.param("orgSlug"), c.req.param("eventSlug"));
 
   if (ev.registration_mode === "none")
@@ -94,6 +94,8 @@ pub.post("/:orgSlug/:eventSlug/register", async (c) => {
       status: "pending",
       message: "Inscription enregistrée — en attente de validation par l'organisateur.",
       ticketId: id,
+      // Lien permanent de suivi : l'inscrit y verra son QR une fois validé.
+      token: qr_token,
     }, 201);
   }
 
@@ -124,6 +126,34 @@ pub.get("/t/:token/qr", async (c) => {
   return c.body(svg, 200, {
     "Content-Type": "image/svg+xml",
     "Cache-Control": "private, max-age=300",
+  });
+});
+
+// GET /public/ticket/:token — statut d'un billet (suivi d'inscription).
+// Permet à un inscrit de récupérer son QR une fois son billet validé.
+pub.get("/ticket/:token", async (c) => {
+  const token = c.req.param("token");
+  const ticketId = await verifyQrToken(token, c.env.QR_HMAC_SECRET);
+  if (!ticketId) throw new ApiError(404, "not_found", "Billet introuvable");
+
+  const t = await c.env.DB.prepare(
+    `SELECT t.status, t.holder_name, t.category,
+            e.name AS event_name, e.date AS event_date, e.location AS event_location
+       FROM tickets t JOIN events e ON e.id = t.event_id
+      WHERE t.id = ? AND t.qr_token = ?`
+  ).bind(ticketId, token).first<{
+    status: string; holder_name: string | null; category: string;
+    event_name: string; event_date: string | null; event_location: string | null;
+  }>();
+  if (!t) throw new ApiError(404, "not_found", "Billet introuvable");
+
+  const usable = t.status === "valid" || t.status === "used";
+  return ok(c, {
+    status: t.status,
+    holder_name: t.holder_name,
+    category: t.category,
+    event: { name: t.event_name, date: t.event_date, location: t.event_location },
+    qr: usable ? await qrDataUri(token) : null,
   });
 });
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import type { PublicEvent as PublicEventT } from "../lib/types";
 import { PlainLayout } from "../components/Layout";
@@ -21,7 +21,7 @@ export default function PublicEvent() {
   const [result, setResult] = useState<RegResult | null>(null);
 
   useEffect(() => {
-    api<PublicEventT>(`/public/${orgSlug}/${eventSlug}`, { auth: false })
+    api<PublicEventT>(`/public/event/${orgSlug}/${eventSlug}`, { auth: false })
       .then(setEv).catch(() => setNotFound(true));
   }, [orgSlug, eventSlug]);
 
@@ -82,7 +82,7 @@ function RegisterForm({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setBusy(true); setErr("");
     try {
-      const r = await api<RegResult>(`/public/${orgSlug}/${eventSlug}/register`, {
+      const r = await api<RegResult>(`/public/event/${orgSlug}/${eventSlug}/register`, {
         body: { name, email }, auth: false,
       });
       onDone(r);
@@ -104,12 +104,21 @@ function RegisterForm({
 }
 
 function ResultView({ result }: { result: RegResult }) {
+  // Lien permanent de suivi du billet (route in-app, basename géré par le routeur).
+  const ticketPath = result.token ? `/ticket/${result.token}` : null;
+
   if (result.status === "pending")
     return (
       <div className="card center">
         <h2>✅ Inscription enregistrée</h2>
         <p>{result.message ?? "Votre demande est en attente de validation par l'organisateur."}</p>
-        <p className="muted">Vous recevrez votre billet une fois validé.</p>
+        <p className="muted">
+          Dès que l'organisateur valide, votre billet QR apparaîtra sur votre page de suivi.
+          <strong> Gardez ce lien en favori :</strong>
+        </p>
+        {ticketPath && (
+          <Link to={ticketPath} className="btn primary">Suivre mon billet</Link>
+        )}
       </div>
     );
 
@@ -122,11 +131,14 @@ function ResultView({ result }: { result: RegResult }) {
           ? <img src={result.qr} alt="QR billet" />
           : result.qrUrl && <img src={result.qrUrl} alt="QR billet" />}
       </div>
-      {result.qrUrl && (
-        <p style={{ marginTop: 14 }}>
+      <div className="row" style={{ justifyContent: "center", marginTop: 14, gap: 8 }}>
+        {result.qrUrl && (
           <a href={result.qrUrl} target="_blank" rel="noreferrer" className="btn sm">Ouvrir le QR</a>
-        </p>
-      )}
+        )}
+        {ticketPath && (
+          <Link to={ticketPath} className="btn sm ghost">Lien permanent</Link>
+        )}
+      </div>
     </div>
   );
 }

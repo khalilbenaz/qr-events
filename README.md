@@ -105,6 +105,11 @@ connecte avec ce code ; le token est stocké chiffré. Mode offline : au premier
 login en ligne, l'app télécharge le manifeste des billets (`GET /scan/manifest`)
 puis peut valider sans réseau ; les scans hors-ligne sont rejoués automatiquement.
 
+**APK publié sur GitHub Releases** : pousser un tag `v*` déclenche le workflow
+[`release-apk.yml`](.github/workflows/release-apk.yml) qui build l'APK et l'attache
+à une Release (API de prod embarquée). Déclenchement manuel possible
+(`Actions → Release APK Android → Run workflow`) → APK en artefact.
+
 > Signature APK : par défaut le build release utilise la clé debug (installable en
 > direct). Pour une vraie distribution, créer un keystore et configurer
 > `android/app/build.gradle.kts` + `key.properties`.

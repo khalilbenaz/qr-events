@@ -51,6 +51,8 @@ export interface EventRow {
   registration_mode: RegistrationMode;
   capacity: number | null;
   status: EventStatus;
+  categories: string | null; // liste CSV des catégories proposées à l'inscription
+  theme: string | null;      // thème visuel (slug)
   created_at: string;
 }
 

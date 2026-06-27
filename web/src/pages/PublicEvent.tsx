@@ -5,6 +5,7 @@ import type { PublicEvent as PublicEventT } from "../lib/types";
 import { PlainLayout } from "../components/Layout";
 import { Alert, Field, Spinner } from "../components/ui";
 import { formatDate, MODE_LABELS } from "../lib/format";
+import { themeOf, themeGradient } from "../lib/themes";
 
 interface RegResult {
   status: "valid" | "pending";
@@ -34,9 +35,10 @@ export default function PublicEvent() {
     <PlainLayout>
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
         {ev.cover_image_url && <img className="cover" src={ev.cover_image_url} alt="" />}
-        <div className="hero">
-          <h1>{ev.name}</h1>
-          <p style={{ margin: "4px 0", color: "var(--text)" }}>
+        <div className="hero" style={{ background: themeGradient(ev.theme), border: "none", color: "#fff" }}>
+          <div style={{ fontSize: 40, lineHeight: 1 }}>{themeOf(ev.theme).emoji}</div>
+          <h1 style={{ color: "#fff", marginTop: 8 }}>{ev.name}</h1>
+          <p style={{ margin: "4px 0", color: "rgba(255,255,255,.9)" }}>
             📅 {formatDate(ev.date)}{ev.location && <>  ·  📍 {ev.location}</>}
           </p>
           {ev.capacity != null && (
@@ -61,7 +63,7 @@ export default function PublicEvent() {
           <div className="card center"><p style={{ margin: 0 }}>Plus de places disponibles.</p></div>
         ) : (
           <RegisterForm orgSlug={orgSlug!} eventSlug={eventSlug!} mode={ev.registration_mode}
-            onDone={setResult} />
+            categories={ev.categories} onDone={setResult} />
         )}
       </div>
     </PlainLayout>
@@ -69,13 +71,14 @@ export default function PublicEvent() {
 }
 
 function RegisterForm({
-  orgSlug, eventSlug, mode, onDone,
+  orgSlug, eventSlug, mode, categories, onDone,
 }: {
-  orgSlug: string; eventSlug: string; mode: string;
+  orgSlug: string; eventSlug: string; mode: string; categories: string[];
   onDone: (r: RegResult) => void;
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [category, setCategory] = useState(categories[0] ?? "");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -83,7 +86,8 @@ function RegisterForm({
     e.preventDefault(); setBusy(true); setErr("");
     try {
       const r = await api<RegResult>(`/public/event/${orgSlug}/${eventSlug}/register`, {
-        body: { name, email }, auth: false,
+        body: categories.length ? { name, email, category } : { name, email },
+        auth: false,
       });
       onDone(r);
     } catch (e) {
@@ -98,6 +102,13 @@ function RegisterForm({
       {err && <Alert kind="error">{err}</Alert>}
       <Field label="Nom complet"><input value={name} required onChange={(e) => setName(e.target.value)} /></Field>
       <Field label="Email"><input type="email" value={email} required onChange={(e) => setEmail(e.target.value)} /></Field>
+      {categories.length > 0 && (
+        <Field label="Catégorie">
+          <select value={category} onChange={(e) => setCategory(e.target.value)} required>
+            {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </Field>
+      )}
       <button className="btn primary block" disabled={busy}>{busy ? "Envoi…" : "S'inscrire"}</button>
     </form>
   );

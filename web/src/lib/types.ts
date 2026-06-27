@@ -21,6 +21,8 @@ export interface EventRow {
   registration_mode: RegistrationMode;
   capacity: number | null;
   status: EventStatus;
+  categories: string | null; // CSV des catégories proposées à l'inscription
+  theme: string | null;      // thème visuel (slug)
   created_at: string;
   tickets_count?: number;
 }
@@ -60,6 +62,8 @@ export interface PublicEvent {
   cover_image_url: string | null;
   registration_mode: RegistrationMode;
   capacity: number | null;
+  categories: string[];
+  theme: string | null;
   remaining: number | null;
   soldOut: boolean;
 }

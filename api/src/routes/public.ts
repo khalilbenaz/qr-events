@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { AppContext, AppEnv, EventRow, TicketRow } from "../types";
 import { newId, signQrToken, verifyQrToken } from "../lib/crypto";
 import { qrSvg, qrDataUri } from "../lib/qr";
+import { parseCategories } from "../lib/categories";
 import { ApiError, ok } from "../lib/response";
 import { rateLimit, clientKey } from "../middleware/ratelimit";
 
@@ -45,6 +46,8 @@ pub.get("/event/:orgSlug/:eventSlug", async (c) => {
     cover_image_url: ev.cover_image_url,
     registration_mode: ev.registration_mode,
     capacity: ev.capacity,
+    categories: parseCategories(ev.categories),
+    theme: ev.theme,
     remaining,
     soldOut: remaining !== null && remaining <= 0,
   });
@@ -78,11 +81,23 @@ pub.post("/event/:orgSlug/:eventSlug/register", async (c) => {
   if (existing)
     throw new ApiError(409, "already_registered", "Déjà inscrit avec cet email");
 
+  // Catégorie : si l'événement définit une liste, la sélection doit en faire partie.
+  const allowed = parseCategories(ev.categories);
+  let category: string;
+  if (allowed.length > 0) {
+    const chosen = (b.category ?? "").trim();
+    const match = allowed.find((x) => x.toLowerCase() === chosen.toLowerCase());
+    if (match) category = match;
+    else if (!chosen && allowed.length === 1) category = allowed[0];
+    else throw new ApiError(400, "invalid_category", "Catégorie invalide ou manquante");
+  } else {
+    category = (b.category ?? "standard").trim() || "standard";
+  }
+
   // Mode 'approval' → pending (l'organisateur valide) ; 'open' → valid direct.
   const status = ev.registration_mode === "approval" ? "pending" : "valid";
   const id = newId();
   const qr_token = await signQrToken(id, c.env.QR_HMAC_SECRET);
-  const category = (b.category ?? "standard").trim() || "standard";
 
   await c.env.DB.prepare(
     `INSERT INTO tickets (id, event_id, holder_name, holder_email, category, qr_token, status)

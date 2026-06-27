@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import type { EventRow } from "../lib/types";
 import { formatDate, MODE_LABELS } from "../lib/format";
+import { themeOf } from "../lib/themes";
 import { EventBadge, Empty, Spinner } from "../components/ui";
 
 export default function EventsList() {
@@ -29,10 +30,13 @@ export default function EventsList() {
         </Empty>
       ) : (
         <div className="grid cols-2">
-          {events.map((ev) => (
-            <Link to={`/app/events/${ev.id}`} className="card hover card-link" key={ev.id}>
+          {events.map((ev) => {
+            const th = themeOf(ev.theme);
+            return (
+            <Link to={`/app/events/${ev.id}`} className="card hover card-link" key={ev.id}
+              style={{ borderLeft: `4px solid ${th.c1}` }}>
               <div className="row">
-                <h3 style={{ margin: 0 }}>{ev.name}</h3>
+                <h3 style={{ margin: 0 }}>{th.emoji} {ev.name}</h3>
                 <div className="spacer" />
                 <EventBadge status={ev.status} />
               </div>
@@ -45,7 +49,8 @@ export default function EventsList() {
                 {ev.capacity != null && <span className="badge">cap. {ev.capacity}</span>}
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       )}
     </>

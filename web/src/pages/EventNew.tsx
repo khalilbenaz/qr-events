@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import type { EventRow, RegistrationMode } from "../lib/types";
 import { MODE_LABELS } from "../lib/format";
+import { THEMES, themeGradient } from "../lib/themes";
 import { Alert, Field } from "../components/ui";
 
 const slugify = (s: string) =>
@@ -14,6 +15,7 @@ export default function EventNew() {
   const [f, setF] = useState({
     name: "", slug: "", description: "", date: "", location: "",
     cover_image_url: "", registration_mode: "none" as RegistrationMode, capacity: "",
+    categories: "", theme: "",
   });
   const [slugEdited, setSlugEdited] = useState(false);
   const [err, setErr] = useState("");
@@ -35,6 +37,8 @@ export default function EventNew() {
           cover_image_url: f.cover_image_url || null,
           registration_mode: f.registration_mode,
           capacity: f.capacity ? Number(f.capacity) : null,
+          categories: f.categories || null,
+          theme: f.theme || null,
         },
       });
       nav(`/app/events/${ev.id}`);
@@ -64,6 +68,13 @@ export default function EventNew() {
           <Field label="Description">
             <textarea value={f.description} onChange={(e) => set("description", e.target.value)} />
           </Field>
+          <Field label="Thème de l'événement" hint="Définit l'ambiance visuelle (couleurs, icône) de la page publique.">
+            <select value={f.theme} onChange={(e) => set("theme", e.target.value)}>
+              <option value="">🎫 Standard</option>
+              {THEMES.map((t) => <option key={t.slug} value={t.slug}>{t.emoji} {t.label}</option>)}
+            </select>
+            <div style={{ height: 8, borderRadius: 6, marginTop: 8, background: themeGradient(f.theme) }} />
+          </Field>
           <div className="row" style={{ gap: 14, alignItems: "flex-start" }}>
             <div style={{ flex: 1 }}>
               <Field label="Date & heure">
@@ -79,6 +90,10 @@ export default function EventNew() {
           <Field label="Image de couverture (URL)">
             <input value={f.cover_image_url} placeholder="https://…"
               onChange={(e) => set("cover_image_url", e.target.value)} />
+          </Field>
+          <Field label="Catégories de billets" hint="Séparées par des virgules (ex: Standard, VIP, Presse). Vide = catégorie unique.">
+            <input value={f.categories} placeholder="Standard, VIP, Presse"
+              onChange={(e) => set("categories", e.target.value)} />
           </Field>
           <div className="row" style={{ gap: 14, alignItems: "flex-start" }}>
             <div style={{ flex: 1 }}>

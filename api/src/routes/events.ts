@@ -1,6 +1,8 @@
 import { Hono } from "hono";
 import type { AppEnv, EventRow, RegistrationMode, EventStatus } from "../types";
 import { newId } from "../lib/crypto";
+import { normalizeCategories } from "../lib/categories";
+import { normalizeTheme } from "../lib/themes";
 import { ApiError, ok } from "../lib/response";
 import { getOwnedEvent } from "../middleware/tenant";
 
@@ -57,13 +59,14 @@ events.post("/", async (c) => {
   await c.env.DB.prepare(
     `INSERT INTO events
        (id, organizer_id, slug, name, description, date, location,
-        cover_image_url, registration_mode, capacity, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft')`
+        cover_image_url, registration_mode, capacity, categories, theme, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft')`
   )
     .bind(
       id, organizerId, slug, name,
       b.description ?? null, b.date ?? null, b.location ?? null,
-      b.cover_image_url ?? null, mode, b.capacity ?? null
+      b.cover_image_url ?? null, mode, b.capacity ?? null,
+      normalizeCategories(b.categories), normalizeTheme(b.theme)
     )
     .run();
 
@@ -106,6 +109,8 @@ events.patch("/:id", async (c) => {
       throw new ApiError(400, "invalid_capacity");
     set("capacity", b.capacity);
   }
+  if (b.categories !== undefined) set("categories", normalizeCategories(b.categories));
+  if (b.theme !== undefined) set("theme", normalizeTheme(b.theme));
   for (const col of ["description", "date", "location", "cover_image_url"] as const) {
     if (b[col] !== undefined) set(col, b[col]);
   }

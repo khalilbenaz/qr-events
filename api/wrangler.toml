@@ -1,0 +1,39 @@
+name = "qr-events-api"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ---------------------------------------------------------------------------
+# D1 (base de données SQLite)
+# Crée la base puis colle l'id renvoyé ci-dessous :
+#   npx wrangler d1 create qr-events
+# ---------------------------------------------------------------------------
+[[d1_databases]]
+binding = "DB"
+database_name = "qr-events"
+database_id = "REMPLACER_PAR_VOTRE_DATABASE_ID"
+migrations_dir = "migrations"
+
+# ---------------------------------------------------------------------------
+# KV (cache / idempotence / rate-limit)
+#   npx wrangler kv namespace create CACHE
+# ---------------------------------------------------------------------------
+[[kv_namespaces]]
+binding = "CACHE"
+id = "REMPLACER_PAR_VOTRE_KV_ID"
+
+# ---------------------------------------------------------------------------
+# Variables NON secrètes
+# ---------------------------------------------------------------------------
+[vars]
+# Origine(s) autorisée(s) pour le CORS (dashboard + pages publiques).
+# En prod : "https://qr-events.pages.dev". Plusieurs valeurs séparées par des virgules.
+ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:4173"
+# Base URL publique de l'API (utilisée pour construire les liens QR).
+PUBLIC_API_URL = "http://localhost:8787"
+
+# ---------------------------------------------------------------------------
+# Secrets (NE PAS mettre ici). En local -> .dev.vars. En prod :
+#   npx wrangler secret put JWT_SECRET
+#   npx wrangler secret put QR_HMAC_SECRET
+# ---------------------------------------------------------------------------

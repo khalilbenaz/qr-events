@@ -1,0 +1,8 @@
+# Copier en `.dev.vars` (ignoré par git) pour le dev local `wrangler dev`.
+# En production, utiliser `wrangler secret put <NOM>`.
+
+# Secret de signature des JWT organisateur (≥ 32 caractères aléatoires)
+JWT_SECRET="dev-change-moi-32-octets-minimum-aleatoire"
+
+# Secret HMAC de signature des tokens QR (≥ 32 caractères aléatoires, DISTINCT du JWT)
+QR_HMAC_SECRET="dev-change-moi-autre-secret-hmac-aleatoire"

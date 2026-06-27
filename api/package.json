@@ -1,0 +1,23 @@
+{
+  "name": "qr-events-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply qr-events --local",
+    "db:migrate:remote": "wrangler d1 migrations apply qr-events --remote",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.6.14",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "@types/qrcode": "^1.5.5",
+    "typescript": "^5.7.2",
+    "wrangler": "^3.95.0"
+  }
+}

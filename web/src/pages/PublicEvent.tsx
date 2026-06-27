@@ -36,13 +36,12 @@ export default function PublicEvent() {
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
         {ev.cover_image_url && <img className="cover" src={ev.cover_image_url} alt="" />}
         <div className="hero" style={themeHeroStyle(ev.theme)}>
-          <span className="badge" style={{
-            background: "rgba(255,255,255,.22)", color: "#fff", border: "none", backdropFilter: "blur(4px)",
-          }}>
+          <span className="kicker">
             {themeOf(ev.theme).emoji} {themeOf(ev.theme).label}
+            {ev.date && <> · {formatDate(ev.date)}</>}
           </span>
-          <h1 style={{ color: "#fff", marginTop: 12, textShadow: "0 2px 12px rgba(0,0,0,.25)" }}>{ev.name}</h1>
-          <p style={{ margin: "4px 0", color: "rgba(255,255,255,.92)" }}>
+          <h1 style={{ color: "#fff", marginTop: 16, textShadow: "0 3px 18px rgba(0,0,0,.35)" }}>{ev.name}</h1>
+          <p style={{ margin: "6px 0 0", color: "rgba(255,255,255,.94)", fontSize: "1.05rem", fontWeight: 600 }}>
             📅 {formatDate(ev.date)}{ev.location && <>  ·  📍 {ev.location}</>}
           </p>
           {ev.capacity != null && (

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>QR Events — billetterie & contrôle d'accès par QR</title>
+<meta name="description" content="Créez vos événements, générez des billets QR signés ou ouvrez l'inscription en ligne, et scannez les entrées depuis votre téléphone. Sans double scan, en temps réel." />
+<style>
+  :root{
+    --bg:#07070d;--surface:#12121f;--surface2:#191928;--border:#26263a;
+    --text:#f2f0ff;--muted:#9b98b8;--neon:#ff2fb9;--accent:#b14bff;--accent2:#4f7bff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    color:var(--text);background:
+      radial-gradient(900px 600px at 12% -10%,rgba(177,75,255,.20),transparent 60%),
+      radial-gradient(800px 600px at 100% 0%,rgba(79,123,255,.16),transparent 55%),var(--bg);
+    background-attachment:fixed;-webkit-font-smoothing:antialiased;line-height:1.6}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;position:sticky;top:0;
+    background:rgba(7,7,13,.72);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:5}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.01em}
+  .logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:17px;
+    background:linear-gradient(135deg,var(--neon),var(--accent),var(--accent2));box-shadow:0 0 18px rgba(177,75,255,.6)}
+  .btn{display:inline-flex;align-items:center;gap:8px;justify-content:center;padding:12px 20px;border-radius:12px;
+    border:1px solid var(--border);background:var(--surface2);color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;transition:.15s}
+  .btn:hover{border-color:#3a2a6b}
+  .btn.primary{background:linear-gradient(135deg,var(--neon),var(--accent) 55%,var(--accent2));border-color:transparent;
+    box-shadow:0 0 24px -2px rgba(255,47,185,.55)}
+  .btn.primary:hover{filter:brightness(1.1)}
+  .btn.sm{padding:9px 15px;font-size:.85rem}
+  .kicker{display:inline-flex;gap:8px;text-transform:uppercase;letter-spacing:.22em;font-size:.72rem;font-weight:800;
+    padding:7px 15px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18)}
+  .hero{margin-top:32px;padding:64px 40px;border-radius:26px;text-align:center;position:relative;overflow:hidden;
+    border:1px solid var(--border);
+    background:
+      radial-gradient(130% 130% at 0% 0%,rgba(255,47,185,.28),transparent 46%),
+      radial-gradient(130% 130% at 100% 100%,rgba(79,123,255,.30),transparent 50%),
+      linear-gradient(135deg,#1a0f2e,#0c0c16)}
+  .hero h1{font-size:clamp(2.3rem,6.5vw,4rem);font-weight:800;letter-spacing:-.03em;line-height:1.03;margin:18px 0 14px;
+    text-shadow:0 3px 22px rgba(0,0,0,.4)}
+  .hero p{max-width:620px;margin:0 auto 26px;color:rgba(255,255,255,.86);font-size:1.08rem}
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .demo{margin-top:18px;font-size:.82rem;color:rgba(255,255,255,.7)}
+  code{background:rgba(255,255,255,.1);padding:2px 7px;border-radius:6px;font-size:.85em}
+  section{margin-top:64px}
+  h2{font-size:1.7rem;font-weight:800;letter-spacing:-.02em;margin:0 0 6px}
+  .sub{color:var(--muted);margin:0 0 24px}
+  .grid{display:grid;gap:16px}
+  .c3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .card{background:linear-gradient(180deg,var(--surface),#0c0c16);border:1px solid var(--border);border-radius:16px;padding:24px;
+    transition:.18s}
+  .card:hover{transform:translateY(-3px);border-color:#3a2a6b;box-shadow:0 18px 50px -22px rgba(177,75,255,.7)}
+  .card .ico{font-size:28px}
+  .card h3{margin:10px 0 6px;font-size:1.15rem}
+  .card p{margin:0;color:var(--muted);font-size:.95rem}
+  .themes{display:flex;flex-wrap:wrap;gap:12px}
+  .chip{padding:12px 18px;border-radius:14px;color:#fff;font-weight:800;font-size:.95rem;border:none;
+    box-shadow:0 8px 24px -10px rgba(0,0,0,.6)}
+  .step{display:flex;gap:16px;align-items:flex-start}
+  .num{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-weight:800;
+    background:linear-gradient(135deg,var(--neon),var(--accent2));box-shadow:0 0 16px rgba(177,75,255,.5)}
+  .apk{background:linear-gradient(135deg,#1a0f2e,#0c0c16);border:1px solid var(--border);border-radius:20px;
+    padding:34px;text-align:center}
+  footer{margin:72px 0 40px;text-align:center;color:var(--muted);font-size:.85rem}
+  footer a{color:#c9b8ff}
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="logo">🎟️</span> QR Events</div>
+    <a class="btn sm primary" href="https://qr-events.pages.dev/app/login">Ouvrir l'app →</a>
+  </header>
+
+  <div class="wrap">
+    <div class="hero">
+      <span class="kicker">🎟️ Billetterie & contrôle d'accès</span>
+      <h1>Vos événements.<br>Vos QR. Vos entrées.</h1>
+      <p>Générez des billets QR signés <em>ou</em> ouvrez l'inscription en ligne, puis scannez
+         les entrées depuis votre téléphone — sans double scan, en temps réel.</p>
+      <div class="cta">
+        <a class="btn primary" href="https://qr-events.pages.dev/app/register">Créer un compte organisateur</a>
+        <a class="btn" href="https://qr-events.pages.dev/app/login">Se connecter</a>
+      </div>
+      <div class="demo">Démo : <code>demo@qrevents.app</code> / <code>demo12345</code></div>
+    </div>
+
+    <section>
+      <h2>Tout pour gérer l'accès</h2>
+      <p class="sub">Du billet à la porte, en passant par l'inscription en ligne.</p>
+      <div class="grid c3">
+        <div class="card"><div class="ico">🎟️</div><h3>Billets signés</h3><p>Tokens HMAC opaques, impossibles à falsifier.</p></div>
+        <div class="card"><div class="ico">📵</div><h3>Anti-double-scan</h3><p>Validation atomique : un billet = une entrée.</p></div>
+        <div class="card"><div class="ico">📝</div><h3>Inscription en ligne</h3><p>Page publique : inscription libre ou avec validation.</p></div>
+        <div class="card"><div class="ico">🏷️</div><h3>Catégories</h3><p>Standard, VIP, Presse… au choix à l'inscription.</p></div>
+        <div class="card"><div class="ico">📱</div><h3>Scan mobile</h3><p>App Android, feedback instantané, mode hors-ligne.</p></div>
+        <div class="card"><div class="ico">📊</div><h3>Stats temps réel</h3><p>Affluence, taux de remplissage, par porte.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>🎨 Un thème pour chaque événement</h2>
+      <p class="sub">Chaque événement a son ambiance : couleurs néon et identité dédiées.</p>
+      <div class="themes">
+        <span class="chip" style="background:linear-gradient(135deg,#7c3aed,#db2777,#f43f5e)">🎵 Concert</span>
+        <span class="chip" style="background:linear-gradient(135deg,#0ea5e9,#2563eb,#4f46e5)">🎤 Conférence</span>
+        <span class="chip" style="background:linear-gradient(135deg,#f97316,#ec4899,#8b5cf6)">🎉 Soirée</span>
+        <span class="chip" style="background:linear-gradient(135deg,#059669,#22c55e,#a3e635)">🏆 Sport</span>
+        <span class="chip" style="background:linear-gradient(135deg,#be185d,#ec4899,#fcd34d)">💍 Mariage</span>
+        <span class="chip" style="background:linear-gradient(135deg,#06b6d4,#6366f1,#a855f7)">🖼️ Expo</span>
+        <span class="chip" style="background:linear-gradient(135deg,#f59e0b,#ef4444,#b91c1c)">🛠️ Atelier</span>
+        <span class="chip" style="background:linear-gradient(135deg,#4c1d95,#7c3aed,#d4af37)">🥂 Gala</span>
+        <span class="chip" style="background:linear-gradient(135deg,#ec4899,#f97316,#facc15)">🎪 Festival</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Comment ça marche</h2>
+      <p class="sub">Trois étapes, de la création à la porte.</p>
+      <div class="grid c3">
+        <div class="card step"><div class="num">1</div><div><h3>Créez l'événement</h3><p>Thème, mode d'inscription et capacité.</p></div></div>
+        <div class="card step"><div class="num">2</div><div><h3>Billets & inscriptions</h3><p>Générez des lots et/ou partagez la page publique.</p></div></div>
+        <div class="card step"><div class="num">3</div><div><h3>Scannez les entrées</h3><p>Installez l'APK, connectez la porte par code.</p></div></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="apk">
+        <h2>📱 Application de scan (Android)</h2>
+        <p class="sub" style="margin-bottom:20px">Scan caméra, feedback son/vibration, compteur live et mode hors-ligne.</p>
+        <a class="btn primary" href="https://github.com/khalilbenaz/qr-events/releases/latest">Télécharger l'APK</a>
+      </div>
+    </section>
+
+    <footer>
+      Cloudflare Workers · D1 · KV · React · Flutter<br>
+      <a href="https://qr-events.pages.dev">Ouvrir l'app</a> ·
+      <a href="https://github.com/khalilbenaz/qr-events">Code source</a> ·
+      <a href="https://github.com/khalilbenaz/qr-events/releases/latest">Releases</a>
+    </footer>
+  </div>
+</body>
+</html>

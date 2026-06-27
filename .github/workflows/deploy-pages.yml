@@ -1,10 +1,13 @@
-name: Deploy web to GitHub Pages
+name: Deploy vitrine to GitHub Pages
 
+# GitHub Pages héberge UNIQUEMENT la vitrine (site statique de présentation).
+# L'application complète (dashboard + pages publiques + scan) est sur Cloudflare Pages :
+# https://qr-events.pages.dev
 on:
   push:
     branches: [main]
     paths:
-      - "web/**"
+      - "vitrine/**"
       - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
 
@@ -13,47 +16,25 @@ permissions:
   pages: write
   id-token: write
 
-# Un seul déploiement à la fois (annule les runs en cours).
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: web
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: web/package-lock.json
-      - run: npm ci
-      - name: Build
-        env:
-          # Sous-chemin du site projet GitHub Pages.
-          VITE_BASE: /${{ github.event.repository.name }}/
-          # URL de l'API Workers (variable de dépôt, avec repli).
-          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://qr-events-api.khalilbenaz.workers.dev' }}
-        run: npm run build
-      - name: SPA fallback (404 -> index)
-        run: cp dist/index.html dist/404.html
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: web/dist
-
   deploy:
-    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@v4
+      - name: Fallback 404
+        run: cp vitrine/index.html vitrine/404.html
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: vitrine
       - id: deployment
         uses: actions/deploy-pages@v4

@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "deploy": "npm run build && npx wrangler pages deploy dist --project-name qr-events --branch main"
   },
   "dependencies": {
     "react": "^18.3.1",

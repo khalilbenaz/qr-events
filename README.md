@@ -7,7 +7,8 @@ mobile de scan. Tout tient dans le **free tier Cloudflare**.
 
 | Service | URL |
 |---|---|
-| 🌐 Web (dashboard + pages publiques) | https://khalilbenaz.github.io/qr-events/ |
+| 🚀 **App** (dashboard + pages publiques + scan) | **https://qr-events.pages.dev** (Cloudflare Pages) |
+| 🪧 Vitrine (présentation) | https://khalilbenaz.github.io/qr-events/ (GitHub Pages) |
 | ⚙️ API (Cloudflare Worker) | https://qr-events-api.khalilbenaz.workers.dev |
 | 📱 Mobile (APK) | [Dernière release GitHub](https://github.com/khalilbenaz/qr-events/releases/latest) |
 
@@ -96,12 +97,16 @@ npm run dev                 # http://localhost:5173
 Routes : `/` (accueil), `/app/login` · `/app/events` (dashboard organisateur),
 `/{org-slug}/{event-slug}` (page publique), `/ticket/:token` (suivi d'un billet).
 
-**Déploiement actuel : GitHub Pages** (automatique). À chaque push sur `main`
-touchant `web/**`, le workflow [`deploy-pages.yml`](.github/workflows/deploy-pages.yml)
-build avec `VITE_BASE=/qr-events/` + `VITE_API_URL` (variable de dépôt) et publie.
-L'origine `https://khalilbenaz.github.io` est déjà dans `ALLOWED_ORIGINS` de l'API.
-Voir [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). _(Alternative pour garder le repo privé :
-Cloudflare Pages — `public/_redirects` fournit déjà le fallback SPA.)_
+**Hébergement de l'app : Cloudflare Pages** (`https://qr-events.pages.dev`).
+Déploiement : `cd web && npm run deploy` (build + `wrangler pages deploy`).
+Le fichier `public/_redirects` assure le fallback SPA. L'origine est déjà dans
+`ALLOWED_ORIGINS` de l'API. Auto-déploiement CI possible via
+[`deploy-cloudflare.yml`](.github/workflows/deploy-cloudflare.yml) (opt-in : secret
+`CLOUDFLARE_API_TOKEN` + variable `CF_DEPLOY=true`).
+
+**GitHub Pages = vitrine uniquement** : le site statique [`vitrine/`](vitrine/) (présentation
++ liens vers l'app) est publié par [`deploy-pages.yml`](.github/workflows/deploy-pages.yml).
+Voir [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## App mobile (Flutter, Android)
 

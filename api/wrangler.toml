@@ -28,7 +28,7 @@ id = "1de26c7d1e844354b72a2a921fa13f9d"
 [vars]
 # Origine(s) autorisée(s) pour le CORS (dashboard + pages publiques).
 # Inclut GitHub Pages (site web) + le dev local. Plusieurs valeurs séparées par des virgules.
-ALLOWED_ORIGINS = "https://khalilbenaz.github.io,http://localhost:5173,http://localhost:4173"
+ALLOWED_ORIGINS = "https://qr-events.pages.dev,https://khalilbenaz.github.io,http://localhost:5173,http://localhost:4173"
 # Base URL publique de l'API (utilisée pour construire les liens QR).
 PUBLIC_API_URL = "https://qr-events-api.khalilbenaz.workers.dev"
 

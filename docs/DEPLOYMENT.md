@@ -6,18 +6,18 @@ Le projet est **déjà déployé**. Cette page documente l'état et comment repr
 
 | Élément | Valeur |
 |---|---|
+| **App** (web) | **https://qr-events.pages.dev** — Cloudflare Pages |
+| Vitrine | https://khalilbenaz.github.io/qr-events/ — GitHub Pages (statique) |
 | API (Worker) | https://qr-events-api.khalilbenaz.workers.dev |
-| Web (GitHub Pages) | https://khalilbenaz.github.io/qr-events/ |
 | D1 database | `qr-events` (`c49e10ec-…`) |
 | KV namespace | `CACHE` (`1de26c7d…`) |
 | Compte Cloudflare | demo@qrevents.app |
 | Dépôt | `khalilbenaz/qr-events` (public) |
 
-> ℹ️ **Visibilité** : GitHub Pages n'est pas disponible pour un dépôt **privé** sur le plan
-> gratuit (il faut GitHub Pro/Team). Le dépôt a donc été rendu **public** pour activer Pages.
-> Aucun secret n'est committé (les secrets — `JWT_SECRET`, `QR_HMAC_SECRET` — sont des
-> secrets Cloudflare ; `.dev.vars` et `.env` sont gitignorés).
-> Alternative pour garder le source privé : héberger le web sur **Cloudflare Pages**.
+> ℹ️ **Répartition** : l'**application** (dashboard + pages publiques + scan) tourne sur
+> **Cloudflare Pages** (même plateforme que l'API). **GitHub Pages** n'héberge plus que la
+> **vitrine** statique (`vitrine/`). Le rendu visuel est identique quel que soit l'hébergeur :
+> il dépend du code, pas de la plateforme.
 
 ## 1. Backend — Cloudflare Workers
 
@@ -40,25 +40,33 @@ Variables (`wrangler.toml [vars]`) :
 - `ALLOWED_ORIGINS` — origines CORS autorisées (inclut `https://khalilbenaz.github.io`).
 - `PUBLIC_API_URL` — URL publique de l'API (liens QR).
 
-## 2. Web — GitHub Pages (automatique)
+## 2. App web — Cloudflare Pages
 
-Le workflow [`.github/workflows/deploy-pages.yml`](../.github/workflows/deploy-pages.yml)
-se déclenche à chaque push sur `main` touchant `web/**` :
-
-1. `npm ci && npm run build` avec
-   - `VITE_BASE=/qr-events/` (sous-chemin du site projet)
-   - `VITE_API_URL` = variable de dépôt `VITE_API_URL` (repli sur l'URL du Worker)
-2. Copie `index.html` → `404.html` (fallback SPA sous GitHub Pages)
-3. Déploiement via `actions/deploy-pages`
-
-Pour changer l'URL de l'API utilisée par le site :
+Déploiement manuel (authentifié via `wrangler login`) :
 
 ```bash
-gh variable set VITE_API_URL --repo khalilbenaz/qr-events --body "https://<nouvelle-url>"
-gh workflow run deploy-pages.yml --repo khalilbenaz/qr-events
+cd web
+npm run deploy   # = npm run build + wrangler pages deploy dist --project-name qr-events
 ```
 
-## 3. Mobile — APK Android
+Build avec `VITE_API_URL=https://qr-events-api.khalilbenaz.workers.dev` (base `/`).
+L'origine `https://qr-events.pages.dev` est dans `ALLOWED_ORIGINS` de l'API.
+
+**Auto-déploiement (opt-in)** via [`deploy-cloudflare.yml`](../.github/workflows/deploy-cloudflare.yml) :
+
+```bash
+gh secret set CLOUDFLARE_API_TOKEN --repo khalilbenaz/qr-events   # token "Pages: Edit"
+gh secret set CLOUDFLARE_ACCOUNT_ID --repo khalilbenaz/qr-events --body 88ab66d1187457a9b98ccf75e1a4f0fd
+gh variable set CF_DEPLOY --repo khalilbenaz/qr-events --body true
+```
+
+## 3. Vitrine — GitHub Pages
+
+Site statique [`vitrine/index.html`](../vitrine/index.html) publié par
+[`deploy-pages.yml`](../.github/workflows/deploy-pages.yml) à chaque push touchant `vitrine/**`.
+Présentation + liens vers l'app Cloudflare ; ne contient aucune logique applicative.
+
+## 4. Mobile — APK Android
 
 ```bash
 cd mobile

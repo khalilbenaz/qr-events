@@ -219,6 +219,7 @@ Réponse uniforme : `{ ok: true, data }` ou `{ ok: false, error: { code, message
 ### Public (sans auth)
 | Méthode | Route | Description |
 |---|---|---|
+| GET | `/public/events` | Tous les événements publiés à venir (home publique) |
 | GET | `/public/org/:orgSlug` | Page organisateur : ses événements publiés |
 | GET | `/public/event/:orgSlug/:eventSlug` | Landing (capacité restante, catégories+modes) |
 | POST | `/public/event/:orgSlug/:eventSlug/register` | Inscription `{ name, email, category? }` (`open`→valid, `approval`→pending) |

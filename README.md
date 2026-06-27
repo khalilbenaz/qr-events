@@ -46,7 +46,10 @@ mobile/  Flutter Android (scan)                ← Étape 4 ✅
 - 🎨 **Templates par type d'événement** : la page publique adopte une mise en page **différente
   selon le thème** — *Live* (concert/soirée/festival, immersif néon), *Élégant* (mariage/gala,
   serif & or), *Pro* (conférence/atelier/expo, structuré), *Sport* (nerveux).
-- 🗺️ **Carte du lieu** intégrée (Google Maps sans clé) sur la page d'événement.
+- 🗺️ **Carte du lieu** intégrée (Google Maps sans clé) sur la page d'événement **et en aperçu live**
+  dans le formulaire de création/édition.
+- 🚪 **Portes dédiées par catégorie** : chaque scanner peut n'accepter qu'une catégorie de billets
+  (ex. porte VIP) ; un billet d'une autre catégorie est refusé (`wrong_category`) sans être consommé.
 - 🎟️ **Deux façons d'obtenir un billet, en parallèle** : génération manuelle de lots
   par l'organisateur **et** inscription publique en ligne (sur le même événement).
 - 🏷️ **Catégories de billets** (ex. Standard / VIP / Presse) proposées au choix à l'inscription.
@@ -199,14 +202,14 @@ Réponse uniforme : `{ ok: true, data }` ou `{ ok: false, error: { code, message
 | Méthode | Route | Description |
 |---|---|---|
 | GET | `/events/:id/scanners` | Liste |
-| POST | `/events/:id/scanners` | `{ name }` → `{ access_code }` |
+| POST | `/events/:id/scanners` | `{ name, category? }` → `{ access_code }` (porte dédiée à une catégorie) |
 | DELETE | `/scanners/:id` | Supprimer |
 
 ### Scan (Bearer scanner)
 | Méthode | Route | Description |
 |---|---|---|
 | POST | `/scanner/login` | `{ access_code }` → token scanner (public) |
-| POST | `/scan` | `{ token, deviceId }` → `ok\|already_used\|invalid\|revoked\|pending\|wrong_event` |
+| POST | `/scan` | `{ token, deviceId }` → `ok\|already_used\|invalid\|revoked\|pending\|wrong_event\|wrong_category` |
 | GET | `/scan/manifest` | Billets de l'événement (cache offline mobile) |
 
 `/scan` supporte un header `Idempotency-Key` (rejeu réseau → même résultat, KV 120 s).

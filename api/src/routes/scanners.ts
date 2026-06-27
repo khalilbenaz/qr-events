@@ -11,6 +11,7 @@ interface ScannerRow {
   event_id: string;
   name: string;
   access_code: string;
+  category: string | null;
   created_at: string;
 }
 
@@ -24,16 +25,25 @@ export const scannersAdmin = new Hono<AppEnv>();
 scannersAdmin.get("/events/:eventId/scanners", async (c) => {
   const ev = await getOwnedEvent(c, c.req.param("eventId"));
   const { results } = await c.env.DB.prepare(
-    "SELECT id, event_id, name, access_code, created_at FROM scanners WHERE event_id = ? ORDER BY created_at"
+    "SELECT id, event_id, name, access_code, category, created_at FROM scanners WHERE event_id = ? ORDER BY created_at"
   ).bind(ev.id).all();
   return ok(c, results);
 });
 
 scannersAdmin.post("/events/:eventId/scanners", async (c) => {
   const ev = await getOwnedEvent(c, c.req.param("eventId"));
-  const { name } = await c.req.json<{ name?: string }>();
+  const { name, category } = await c.req.json<{ name?: string; category?: string }>();
   if (!name || name.trim().length < 2)
     throw new ApiError(400, "invalid_name", "Nom du scanner requis");
+
+  // Catégorie acceptée (optionnelle) : doit faire partie des catégories de l'événement.
+  const allowed = (ev.categories ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  let cat: string | null = (category ?? "").trim() || null;
+  if (cat) {
+    const match = allowed.find((x) => x.toLowerCase() === cat!.toLowerCase());
+    if (!match) throw new ApiError(400, "invalid_category", "Catégorie inconnue pour cet événement");
+    cat = match;
+  }
 
   // Code globalement unique (quelques tentatives en cas de collision rare).
   let code = newAccessCode(6);
@@ -46,10 +56,10 @@ scannersAdmin.post("/events/:eventId/scanners", async (c) => {
 
   const id = newId();
   await c.env.DB.prepare(
-    "INSERT INTO scanners (id, event_id, name, access_code) VALUES (?, ?, ?, ?)"
-  ).bind(id, ev.id, name.trim(), code).run();
+    "INSERT INTO scanners (id, event_id, name, access_code, category) VALUES (?, ?, ?, ?, ?)"
+  ).bind(id, ev.id, name.trim(), code, cat).run();
 
-  return ok(c, { id, event_id: ev.id, name: name.trim(), access_code: code }, 201);
+  return ok(c, { id, event_id: ev.id, name: name.trim(), access_code: code, category: cat }, 201);
 });
 
 scannersAdmin.delete("/scanners/:id", async (c) => {
@@ -82,13 +92,13 @@ scannerAuth.post("/login", async (c) => {
 
   const now = Math.floor(Date.now() / 1000);
   const token = await sign(
-    { sub: s.id, scope: "scanner", eventId: s.event_id, name: s.name,
+    { sub: s.id, scope: "scanner", eventId: s.event_id, name: s.name, cat: s.category ?? null,
       iat: now, exp: now + SCANNER_TTL },
     c.env.JWT_SECRET
   );
   return ok(c, {
     token,
-    scanner: { id: s.id, name: s.name },
+    scanner: { id: s.id, name: s.name, category: s.category ?? null },
     event: { id: s.event_id, name: s.event_name, status: s.event_status },
   });
 });

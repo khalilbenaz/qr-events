@@ -6,8 +6,11 @@ import { Alert, Empty, Field, Spinner } from "../../components/ui";
 export default function ScannersTab({ ev }: { ev: EventRow }) {
   const [scanners, setScanners] = useState<ScannerRow[] | null>(null);
   const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
+
+  const cats = (ev.categories ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 
   const load = () =>
     api<ScannerRow[]>(`/events/${ev.id}/scanners`).then(setScanners).catch(() => setScanners([]));
@@ -16,8 +19,8 @@ export default function ScannersTab({ ev }: { ev: EventRow }) {
   const add = async (e: React.FormEvent) => {
     e.preventDefault(); setBusy(true); setErr("");
     try {
-      await api(`/events/${ev.id}/scanners`, { body: { name } });
-      setName(""); load();
+      await api(`/events/${ev.id}/scanners`, { body: { name, category: category || null } });
+      setName(""); setCategory(""); load();
     } catch (e) {
       setErr(e instanceof ApiError ? e.message : "Erreur");
     } finally { setBusy(false); }
@@ -36,12 +39,22 @@ export default function ScannersTab({ ev }: { ev: EventRow }) {
         <p>Chaque porte reçoit un <strong>code d'accès</strong> à saisir dans l'app mobile pour scanner.</p>
         {err && <Alert kind="error">{err}</Alert>}
         <div className="row" style={{ gap: 14, alignItems: "flex-end" }}>
-          <div style={{ flex: 1, maxWidth: 280 }}>
+          <div style={{ flex: 1, maxWidth: 260 }}>
             <Field label="Nom de la porte">
               <input value={name} required placeholder="Porte A, Entrée VIP…"
                 onChange={(e) => setName(e.target.value)} />
             </Field>
           </div>
+          {cats.length > 0 && (
+            <div style={{ width: 200 }}>
+              <Field label="Catégorie acceptée">
+                <select value={category} onChange={(e) => setCategory(e.target.value)}>
+                  <option value="">Toutes</option>
+                  {cats.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Field>
+            </div>
+          )}
           <div style={{ marginBottom: 14 }}>
             <button className="btn primary" disabled={busy}>{busy ? "…" : "Créer"}</button>
           </div>
@@ -56,6 +69,7 @@ export default function ScannersTab({ ev }: { ev: EventRow }) {
             <div className="card" key={s.id}>
               <div className="row">
                 <h3 style={{ margin: 0 }}>{s.name}</h3>
+                <span className="badge violet">{s.category ?? "Toutes catégories"}</span>
                 <div className="spacer" />
                 <button className="btn sm danger" onClick={() => remove(s)}>Suppr.</button>
               </div>

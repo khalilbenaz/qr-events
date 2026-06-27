@@ -1,5 +1,5 @@
 /// Résultat d'un scan, aligné sur l'API (`result`).
-enum ScanStatus { ok, alreadyUsed, invalid, revoked, pending, wrongEvent, error }
+enum ScanStatus { ok, alreadyUsed, invalid, revoked, pending, wrongEvent, wrongCategory, error }
 
 ScanStatus scanStatusFromApi(String? s) {
   switch (s) {
@@ -13,6 +13,8 @@ ScanStatus scanStatusFromApi(String? s) {
       return ScanStatus.pending;
     case 'wrong_event':
       return ScanStatus.wrongEvent;
+    case 'wrong_category':
+      return ScanStatus.wrongCategory;
     case 'invalid':
       return ScanStatus.invalid;
     default:

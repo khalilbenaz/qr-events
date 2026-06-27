@@ -39,6 +39,7 @@ const MESSAGES: Record<ScanResult, string> = {
   revoked: "Billet révoqué",
   pending: "Billet en attente de validation",
   wrong_event: "Billet d'un autre événement",
+  wrong_category: "Mauvaise porte (catégorie)",
 };
 
 // POST /scan  { token, deviceId? }   (header optionnel: Idempotency-Key)
@@ -46,6 +47,7 @@ scan.post("/", async (c) => {
   const scannerId = c.get("scannerId");
   const eventId = c.get("scannerEventId");
   const scannerName = c.get("scannerName");
+  const scannerCategory = c.get("scannerCategory"); // null = toutes catégories
 
   const { token, deviceId } = await c.req.json<{ token?: string; deviceId?: string }>();
   const device = deviceId ?? "unknown";
@@ -83,10 +85,15 @@ scan.post("/", async (c) => {
   if (!ticketId) return respond("invalid", null);
 
   // 2) Validation ATOMIQUE anti-double-scan : on ne marque 'used' QUE si le
-  //    billet est encore 'valid' ET rattaché à l'événement du scanner.
-  const upd = await c.env.DB.prepare(
-    "UPDATE tickets SET status = 'used' WHERE id = ? AND event_id = ? AND status = 'valid'"
-  ).bind(ticketId, eventId).run();
+  //    billet est encore 'valid', rattaché à l'événement du scanner ET (si la
+  //    porte est dédiée) de la bonne catégorie.
+  const upd = scannerCategory
+    ? await c.env.DB.prepare(
+        "UPDATE tickets SET status = 'used' WHERE id = ? AND event_id = ? AND status = 'valid' AND category = ?"
+      ).bind(ticketId, eventId, scannerCategory).run()
+    : await c.env.DB.prepare(
+        "UPDATE tickets SET status = 'used' WHERE id = ? AND event_id = ? AND status = 'valid'"
+      ).bind(ticketId, eventId).run();
 
   if (upd.meta.changes === 1) {
     const t = await c.env.DB.prepare(
@@ -104,6 +111,12 @@ scan.post("/", async (c) => {
 
   if (!t) return respond("invalid", ticketId);
   if (t.event_id !== eventId) return respond("wrong_event", ticketId);
+
+  // Billet valide mais mauvaise porte (catégorie dédiée) → on ne le consomme pas.
+  if (scannerCategory && t.status === "valid" && t.category !== scannerCategory)
+    return respond("wrong_category", ticketId, {
+      id: t.id, holder_name: t.holder_name, category: t.category, status: t.status,
+    });
 
   const result: ScanResult =
     t.status === "used" ? "already_used" :

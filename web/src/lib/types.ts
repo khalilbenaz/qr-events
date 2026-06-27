@@ -57,6 +57,7 @@ export interface ScannerRow {
   event_id: string;
   name: string;
   access_code: string;
+  category: string | null;
   created_at: string;
 }
 

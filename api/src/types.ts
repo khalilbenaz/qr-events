@@ -32,7 +32,8 @@ export type ScanResult =
   | "invalid"
   | "revoked"
   | "pending"
-  | "wrong_event";
+  | "wrong_event"
+  | "wrong_category";
 
 export type OrganizerRole = "organizer" | "admin";
 export type OrganizerStatus = "pending" | "approved" | "suspended";

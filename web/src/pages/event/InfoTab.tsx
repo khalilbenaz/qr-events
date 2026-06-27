@@ -6,6 +6,7 @@ import type { EventRow, EventStatus, RegistrationMode } from "../../lib/types";
 import { MODE_LABELS } from "../../lib/format";
 import { THEMES, themeGradient } from "../../lib/themes";
 import { Alert, Field } from "../../components/ui";
+import { LocationField } from "../../components/LocationField";
 
 export default function InfoTab({ ev, onChange }: { ev: EventRow; onChange: () => void }) {
   const { organizer } = useAuth();
@@ -82,17 +83,11 @@ export default function InfoTab({ ev, onChange }: { ev: EventRow; onChange: () =
         <Field label="Description">
           <textarea value={f.description} onChange={(e) => set("description", e.target.value)} />
         </Field>
-        <div className="row" style={{ gap: 14, alignItems: "flex-start" }}>
-          <div style={{ flex: 1 }}>
-            <Field label="Date & heure">
-              <input type="datetime-local" value={f.date?.replace(" ", "T").slice(0, 16)}
-                onChange={(e) => set("date", e.target.value)} />
-            </Field>
-          </div>
-          <div style={{ flex: 1 }}>
-            <Field label="Lieu"><input value={f.location} onChange={(e) => set("location", e.target.value)} /></Field>
-          </div>
-        </div>
+        <Field label="Date & heure">
+          <input type="datetime-local" value={f.date?.replace(" ", "T").slice(0, 16)}
+            onChange={(e) => set("date", e.target.value)} />
+        </Field>
+        <LocationField value={f.location} onChange={(v) => set("location", v)} />
         <Field label="Image de couverture (URL)">
           <input value={f.cover_image_url} onChange={(e) => set("cover_image_url", e.target.value)} />
         </Field>

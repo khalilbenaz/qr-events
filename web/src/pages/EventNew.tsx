@@ -5,6 +5,7 @@ import type { EventRow, RegistrationMode } from "../lib/types";
 import { MODE_LABELS } from "../lib/format";
 import { THEMES, themeGradient } from "../lib/themes";
 import { Alert, Field } from "../components/ui";
+import { LocationField } from "../components/LocationField";
 
 const slugify = (s: string) =>
   s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
@@ -75,18 +76,10 @@ export default function EventNew() {
             </select>
             <div style={{ height: 8, borderRadius: 6, marginTop: 8, background: themeGradient(f.theme) }} />
           </Field>
-          <div className="row" style={{ gap: 14, alignItems: "flex-start" }}>
-            <div style={{ flex: 1 }}>
-              <Field label="Date & heure">
-                <input type="datetime-local" value={f.date} onChange={(e) => set("date", e.target.value)} />
-              </Field>
-            </div>
-            <div style={{ flex: 1 }}>
-              <Field label="Lieu">
-                <input value={f.location} onChange={(e) => set("location", e.target.value)} />
-              </Field>
-            </div>
-          </div>
+          <Field label="Date & heure">
+            <input type="datetime-local" value={f.date} onChange={(e) => set("date", e.target.value)} />
+          </Field>
+          <LocationField value={f.location} onChange={(v) => set("location", v)} />
           <Field label="Image de couverture (URL)">
             <input value={f.cover_image_url} placeholder="https://…"
               onChange={(e) => set("cover_image_url", e.target.value)} />

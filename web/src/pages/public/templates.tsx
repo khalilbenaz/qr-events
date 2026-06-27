@@ -5,19 +5,44 @@ import { formatDate } from "../../lib/format";
 import { Countdown, VenueMap, RegistrationCard, type TemplateProps } from "./shared";
 export type { RegResult } from "./shared";
 
-/* Fond de hero : affiche en couverture (overlay) ou dégradé du thème. */
-function heroBg(ev: PublicEvent, tint: string, overlayTop = ".95"): CSSProperties {
+/* En-tête d'événement : affiche en bannière (le texte passe DESSOUS, jamais sur
+   l'image) ; sinon un hero en dégradé du thème avec le texte à l'intérieur. */
+function Header({ ev, variant }: { ev: PublicEvent; variant: "live" | "sport" | "pro" }) {
   const th = themeOf(ev.theme);
+  const titleStyle: CSSProperties =
+    variant === "sport"
+      ? { textTransform: "uppercase", fontStyle: "italic", fontWeight: 900 }
+      : {};
+
+  const body = (
+    <>
+      <span className="kicker">{th.emoji} {th.label} · par {ev.organizer}</span>
+      <h1 className="event-title" style={titleStyle}>{ev.name}</h1>
+      {variant === "pro" ? null : <Meta ev={ev} />}
+      {variant === "sport" && (
+        <div className="kicker" style={{ marginTop: 16, marginBottom: 8 }}>⏱️ Coup d'envoi dans</div>
+      )}
+      {variant !== "pro" && (
+        <div style={{ marginTop: variant === "sport" ? 0 : 16 }}><Countdown date={ev.date} /></div>
+      )}
+    </>
+  );
+
   if (ev.cover_image_url)
-    return {
-      backgroundImage:
-        `linear-gradient(to top, rgba(5,5,11,${overlayTop}) 3%, rgba(5,5,11,.3) 55%, ${tint}), ` +
-        `linear-gradient(135deg, ${th.c1}66, transparent 55%), url("${ev.cover_image_url}")`,
-      backgroundSize: "cover", backgroundPosition: "center",
-      color: "#fff", border: "none",
-      boxShadow: `0 26px 70px -30px ${th.accent}cc`,
-    };
-  return { background: themeGradient(ev.theme), color: "#fff", border: "none" };
+    return (
+      <div className="reveal">
+        <img className="event-cover" src={ev.cover_image_url} alt={ev.name} />
+        <div className="event-head">{body}</div>
+      </div>
+    );
+
+  return (
+    <div className="hero reveal" style={{
+      minHeight: variant === "pro" ? 220 : 320, display: "flex",
+      flexDirection: "column", justifyContent: "flex-end",
+      background: themeGradient(ev.theme), color: "#fff", border: "none",
+    }}>{body}</div>
+  );
 }
 
 function Meta({ ev }: { ev: PublicEvent }) {
@@ -41,14 +66,7 @@ function TemplateLive(p: TemplateProps) {
   const { ev } = p; const th = themeOf(ev.theme);
   return (
     <div className="event tpl-live">
-      <div className="hero reveal" style={{ minHeight: 360, display: "flex",
-        flexDirection: "column", justifyContent: "flex-end", ...heroBg(ev, "rgba(5,5,11,.55)") }}>
-        <span className="kicker">{th.emoji} {th.label} · par {ev.organizer}</span>
-        <h1 style={{ color: "#fff", margin: "14px 0 10px", fontSize: "clamp(2.4rem,7vw,4rem)",
-          textShadow: "0 3px 24px rgba(0,0,0,.65)" }}>{ev.name}</h1>
-        <Meta ev={ev} />
-        <div style={{ marginTop: 18 }}><Countdown date={ev.date} /></div>
-      </div>
+      <Header ev={ev} variant="live" />
       <div className="event-grid">
         <main className="stack">
           {ev.description && <div className="card"><h2>À propos</h2>
@@ -92,12 +110,7 @@ function TemplatePro(p: TemplateProps) {
   const { ev } = p; const th = themeOf(ev.theme);
   return (
     <div className="event tpl-pro">
-      <div className="hero reveal" style={{ ...heroBg(ev, "rgba(5,5,11,.7)", ".88"),
-        minHeight: 240, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-        <span className="kicker">{th.emoji} {th.label}</span>
-        <h1 style={{ color: "#fff", margin: "12px 0 8px" }}>{ev.name}</h1>
-        <p style={{ color: "rgba(255,255,255,.9)", margin: 0, fontWeight: 600 }}>par {ev.organizer}</p>
-      </div>
+      <Header ev={ev} variant="pro" />
       <div className="event-grid">
         <main className="stack">
           {ev.description && <div className="card"><h2>À propos</h2>
@@ -127,17 +140,7 @@ function TemplateSport(p: TemplateProps) {
   const { ev } = p; const th = themeOf(ev.theme);
   return (
     <div className="event tpl-sport">
-      <div className="hero reveal" style={{ minHeight: 340, display: "flex",
-        flexDirection: "column", justifyContent: "flex-end", ...heroBg(ev, "rgba(5,5,11,.55)") }}>
-        <span className="kicker">{th.emoji} {th.label} · par {ev.organizer}</span>
-        <h1 style={{ color: "#fff", margin: "12px 0 10px", textTransform: "uppercase",
-          fontStyle: "italic", fontSize: "clamp(2.4rem,7vw,4.2rem)", textShadow: "0 3px 24px rgba(0,0,0,.65)" }}>{ev.name}</h1>
-        <Meta ev={ev} />
-        <div style={{ marginTop: 18 }}>
-          <div className="kicker" style={{ marginBottom: 8 }}>⏱️ Coup d'envoi dans</div>
-          <Countdown date={ev.date} />
-        </div>
-      </div>
+      <Header ev={ev} variant="sport" />
       <div className="event-grid">
         <main className="stack">
           {ev.description && <div className="card"><h2>À propos</h2>

@@ -252,6 +252,15 @@ body::after { width: 44vw; height: 44vw; right: -12vw; top: -6vw;
 @media (max-width: 820px) { .event-grid { grid-template-columns: 1fr; } .event-grid > aside { position: static; } }
 .panel { box-shadow: 0 18px 50px -26px rgba(177,75,255,.6); }
 
+/* Affiche en bannière + en-tête (le texte ne chevauche jamais l'image) */
+.event-cover {
+  display: block; width: 100%; height: clamp(200px, 36vw, 400px); object-fit: cover;
+  border-radius: 20px; box-shadow: 0 26px 64px -30px rgba(0,0,0,.85), 0 0 0 1px var(--border);
+}
+.event-head { padding: 22px 2px 6px; }
+.event-title { color: #fff; font-size: clamp(2.1rem, 6vw, 3.5rem); margin: 12px 0;
+  text-shadow: 0 2px 18px rgba(0,0,0,.4); }
+
 /* Compte à rebours */
 .countdown { display: flex; gap: 10px; }
 .cd { min-width: 58px; padding: 10px 8px; border-radius: 12px; text-align: center;

@@ -212,6 +212,7 @@ class _ResultOverlay extends StatelessWidget {
       ScanStatus.pending => (const Color(0xFF5B8DEF), Icons.hourglass_top, 'EN ATTENTE'),
       ScanStatus.revoked => (const Color(0xFFEF4F5A), Icons.block, 'RÉVOQUÉ'),
       ScanStatus.wrongEvent => (const Color(0xFFEF4F5A), Icons.event_busy, 'AUTRE ÉVÉNEMENT'),
+      ScanStatus.wrongCategory => (const Color(0xFFF0A020), Icons.door_front_door, 'MAUVAISE PORTE'),
       ScanStatus.invalid => (const Color(0xFFEF4F5A), Icons.close, 'INVALIDE'),
       ScanStatus.error => (const Color(0xFFEF4F5A), Icons.warning, 'ERREUR'),
     };

@@ -116,10 +116,10 @@ export function LocationField({
               top: '100%',
               left: 0,
               right: 0,
-              background: 'var(--bg-card, #fff)',
-              border: '1px solid var(--border)',
+              background: 'var(--surface, #12121f)',
+              border: '1px solid var(--border, #26263a)',
               borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
               zIndex: 999,
               margin: '4px 0 0 0',
               padding: '4px 0',
@@ -136,11 +136,12 @@ export function LocationField({
                   padding: '8px 12px',
                   cursor: 'pointer',
                   fontSize: '14px',
-                  borderBottom: '1px solid var(--border-light, #f0f0f0)',
+                  color: 'var(--text, #f2f0ff)',
+                  borderBottom: '1px solid var(--border, #26263a)',
                   transition: 'background 0.2s',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--bg-hover, #f5f5f5)';
+                  e.currentTarget.style.background = 'var(--surface-2, #191928)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = 'transparent';

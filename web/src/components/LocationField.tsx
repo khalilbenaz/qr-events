@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Field } from './ui';
 
-/** Champ « Lieu » avec bouton de recherche et aperçu cartographique en direct (Google Maps). */
+/** Champ « Lieu » avec aperçu cartographique en direct (Google Maps, sans clé). */
 export function LocationField({
   value,
   onChange,
@@ -10,33 +10,19 @@ export function LocationField({
   onChange: (v: string) => void;
 }) {
   const [q, setQ] = useState(value.trim());
-
-  // Met à jour la carte après 1 seconde d'inactivité dans la saisie (sauvegarde)
+  // Débounce : on ne rafraîchit la carte qu'après une pause de saisie.
   useEffect(() => {
-    const t = setTimeout(() => {
-      setQ(value.trim());
-    }, 1000);
+    const t = setTimeout(() => setQ(value.trim()), 600);
     return () => clearTimeout(t);
   }, [value]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setQ(value.trim());
-  };
-
   return (
-    <Field label="Lieu" hint="Adresse ou nom du lieu (Ex: Complexe Moulay Abdellah, Rabat). Appuyez sur Entrée ou sur le bouton pour forcer l'affichage sur la carte.">
-      <form onSubmit={handleSearch} style={{ display: 'flex', gap: 8, width: '100%' }}>
-        <input
-          value={value}
-          placeholder="Ex : Complexe Moulay Abdellah, Rabat"
-          onChange={(e) => onChange(e.target.value)}
-          style={{ flex: 1 }}
-        />
-        <button type="submit" className="btn" style={{ padding: '0 16px', height: '42px', flexShrink: 0 }}>
-          Rechercher
-        </button>
-      </form>
+    <Field label="Lieu" hint="Adresse ou nom du lieu — un aperçu carte s'affiche automatiquement.">
+      <input
+        value={value}
+        placeholder="Ex : Complexe Moulay Abdellah, Rabat"
+        onChange={(e) => onChange(e.target.value)}
+      />
       {q && (
         <div
           style={{

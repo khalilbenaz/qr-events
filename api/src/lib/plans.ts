@@ -8,9 +8,15 @@ export interface Plan {
 }
 
 export const PLANS: Plan[] = [
-  { slug: "discovery", label: "Découverte", maxEvents: 1,  maxTicketsPerEvent: 100,  price: "Gratuit" },
-  { slug: "pro",       label: "Pro",        maxEvents: 10, maxTicketsPerEvent: 2000, price: "—" },
-  { slug: "business",  label: "Business",   maxEvents: null, maxTicketsPerEvent: null, price: "—" },
+  {
+    slug: 'discovery',
+    label: 'Découverte',
+    maxEvents: 1,
+    maxTicketsPerEvent: 100,
+    price: 'Gratuit',
+  },
+  { slug: 'pro', label: 'Pro', maxEvents: 10, maxTicketsPerEvent: 2000, price: '—' },
+  { slug: 'business', label: 'Business', maxEvents: null, maxTicketsPerEvent: null, price: '—' },
 ];
 
 export function planOf(slug: string | null | undefined): Plan | null {

@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { Organizer } from "../lib/types";
-import { api, getToken, setToken } from "../lib/api";
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import type { Organizer } from '../lib/types';
+import { api, getToken, setToken } from '../lib/api';
 
 interface AuthState {
   organizer: Organizer | null;
@@ -14,7 +14,7 @@ interface AuthState {
 const Ctx = createContext<AuthState>(null as unknown as AuthState);
 export const useAuth = () => useContext(Ctx);
 
-const ORG_KEY = "qre_org";
+const ORG_KEY = 'qre_org';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [organizer, setOrganizer] = useState<Organizer | null>(() => {
@@ -30,9 +30,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refresh = async () => {
-    if (!getToken()) { setOrganizer(null); return; }
+    if (!getToken()) {
+      setOrganizer(null);
+      return;
+    }
     try {
-      const o = await api<Organizer>("/me");
+      const o = await api<Organizer>('/me');
       localStorage.setItem(ORG_KEY, JSON.stringify(o));
       setOrganizer(o);
     } catch {
@@ -42,28 +45,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Rafraîchit le statut du compte au montage (validation admin, changement d'offre).
-  useEffect(() => { refresh(); /* eslint-disable-next-line */ }, []);
+  useEffect(() => {
+    Promise.resolve().then(() => refresh());
+  }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const d = await api<{ token: string; organizer: Organizer }>("/auth/login", {
-        body: { email, password }, auth: false,
+      const d = await api<{ token: string; organizer: Organizer }>('/auth/login', {
+        body: { email, password },
+        auth: false,
       });
       persist(d.token, d.organizer);
       return d.organizer;
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const register = async (email: string, name: string, password: string) => {
     setLoading(true);
     try {
-      const d = await api<{ token: string; organizer: Organizer }>("/auth/register", {
-        body: { email, name, password }, auth: false,
+      const d = await api<{ token: string; organizer: Organizer }>('/auth/register', {
+        body: { email, name, password },
+        auth: false,
       });
       persist(d.token, d.organizer);
       return d.organizer;
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = () => {

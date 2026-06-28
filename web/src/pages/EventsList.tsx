@@ -1,57 +1,70 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { api } from "../lib/api";
-import type { EventRow } from "../lib/types";
-import { formatDate, MODE_LABELS } from "../lib/format";
-import { themeOf, themeGradient } from "../lib/themes";
-import { EventBadge, Empty, Spinner } from "../components/ui";
+import { Link } from 'react-router-dom';
+import { api } from '../lib/api';
+import type { EventRow } from '../lib/types';
+import { formatDate, MODE_LABELS } from '../lib/format';
+import { themeOf, themeGradient } from '../lib/themes';
+import { EventBadge, Empty, Spinner } from '../components/ui';
+
+import { useQuery } from '@tanstack/react-query';
 
 export default function EventsList() {
-  const [events, setEvents] = useState<EventRow[] | null>(null);
-
-  useEffect(() => {
-    api<EventRow[]>("/events").then(setEvents).catch(() => setEvents([]));
-  }, []);
+  const { data: events, isLoading } = useQuery({
+    queryKey: ['events'],
+    queryFn: () => api<EventRow[]>('/events').catch(() => [] as EventRow[]),
+  });
 
   return (
     <>
       <div className="row" style={{ marginBottom: 20 }}>
         <h1 style={{ margin: 0 }}>Mes événements</h1>
         <div className="spacer" />
-        <Link to="/app/events/new" className="btn primary">+ Nouvel événement</Link>
+        <Link to="/app/events/new" className="btn primary">
+          + Nouvel événement
+        </Link>
       </div>
 
-      {events === null ? (
+      {isLoading || !events ? (
         <Spinner />
       ) : events.length === 0 ? (
         <Empty>
           <p>Aucun événement pour l'instant.</p>
-          <Link to="/app/events/new" className="btn primary">Créer mon premier événement</Link>
+          <Link to="/app/events/new" className="btn primary">
+            Créer mon premier événement
+          </Link>
         </Empty>
       ) : (
         <div className="grid cols-2">
           {events.map((ev) => {
             const th = themeOf(ev.theme);
             return (
-            <Link to={`/app/events/${ev.id}`} className="card hover card-link" key={ev.id}
-              style={{ borderLeft: `4px solid ${th.c1}` }}>
-              <div className="row">
-                <h3 style={{ margin: 0 }}>{th.emoji} {ev.name}</h3>
-                <div className="spacer" />
-                <EventBadge status={ev.status} />
-              </div>
-              <p style={{ margin: "8px 0 12px" }}>
-                {formatDate(ev.date)} · {ev.location || "Lieu non défini"}
-              </p>
-              <div className="row wrap" style={{ gap: 8 }}>
-                <span className="badge" style={{ background: themeGradient(ev.theme), color: "#fff", border: "none" }}>
-                  {th.emoji} {th.label}
-                </span>
-                <span className="badge violet">{MODE_LABELS[ev.registration_mode]}</span>
-                <span className="badge">{ev.tickets_count ?? 0} billet(s)</span>
-                {ev.capacity != null && <span className="badge">cap. {ev.capacity}</span>}
-              </div>
-            </Link>
+              <Link
+                to={`/app/events/${ev.id}`}
+                className="card hover card-link"
+                key={ev.id}
+                style={{ borderLeft: `4px solid ${th.c1}` }}
+              >
+                <div className="row">
+                  <h3 style={{ margin: 0 }}>
+                    {th.emoji} {ev.name}
+                  </h3>
+                  <div className="spacer" />
+                  <EventBadge status={ev.status} />
+                </div>
+                <p style={{ margin: '8px 0 12px' }}>
+                  {formatDate(ev.date)} · {ev.location || 'Lieu non défini'}
+                </p>
+                <div className="row wrap" style={{ gap: 8 }}>
+                  <span
+                    className="badge"
+                    style={{ background: themeGradient(ev.theme), color: '#fff', border: 'none' }}
+                  >
+                    {th.emoji} {th.label}
+                  </span>
+                  <span className="badge violet">{MODE_LABELS[ev.registration_mode]}</span>
+                  <span className="badge">{ev.tickets_count ?? 0} billet(s)</span>
+                  {ev.capacity != null && <span className="badge">cap. {ev.capacity}</span>}
+                </div>
+              </Link>
             );
           })}
         </div>

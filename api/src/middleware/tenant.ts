@@ -1,5 +1,5 @@
-import type { AppContext, EventRow } from "../types";
-import { ApiError } from "../lib/response";
+import type { AppContext, EventRow } from '../types';
+import { ApiError } from '../lib/response';
 
 /**
  * Garde d'isolation multi-tenant : récupère un événement UNIQUEMENT s'il
@@ -8,16 +8,11 @@ import { ApiError } from "../lib/response";
  *
  * À utiliser dans CHAQUE route manipulant une ressource liée à un événement.
  */
-export async function getOwnedEvent(
-  c: AppContext,
-  eventId: string
-): Promise<EventRow> {
-  const organizerId = c.get("organizerId");
-  const ev = await c.env.DB.prepare(
-    "SELECT * FROM events WHERE id = ? AND organizer_id = ?"
-  )
+export async function getOwnedEvent(c: AppContext, eventId: string): Promise<EventRow> {
+  const organizerId = c.get('organizerId');
+  const ev = await c.env.DB.prepare('SELECT * FROM events WHERE id = ? AND organizer_id = ?')
     .bind(eventId, organizerId)
     .first<EventRow>();
-  if (!ev) throw new ApiError(404, "not_found", "Événement introuvable");
+  if (!ev) throw new ApiError(404, 'not_found', 'Événement introuvable');
   return ev;
 }

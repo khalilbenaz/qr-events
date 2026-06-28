@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
+import type { ReactNode } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 
 export function Brand() {
   return (
@@ -22,11 +22,25 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <div className="row">
           {organizer && (
             <>
-              {organizer.role === "admin"
-                ? <Link to="/app/admin" className="btn ghost sm">⚙️ Admin</Link>
-                : <Link to="/app/events" className="btn ghost sm">Mes événements</Link>}
-              <span className="muted" style={{ fontSize: ".85rem" }}>{organizer.name}</span>
-              <button className="btn sm" onClick={() => { logout(); nav("/app/login"); }}>
+              {organizer.role === 'admin' ? (
+                <Link to="/app/admin" className="btn ghost sm">
+                  ⚙️ Admin
+                </Link>
+              ) : (
+                <Link to="/app/events" className="btn ghost sm">
+                  Mes événements
+                </Link>
+              )}
+              <span className="muted" style={{ fontSize: '.85rem' }}>
+                {organizer.name}
+              </span>
+              <button
+                className="btn sm"
+                onClick={() => {
+                  logout();
+                  nav('/app/login');
+                }}
+              >
                 Déconnexion
               </button>
             </>
@@ -42,7 +56,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
 export function PlainLayout({ children }: { children: ReactNode }) {
   return (
     <>
-      <div className="topbar"><Brand /><div className="spacer" /></div>
+      <div className="topbar">
+        <Brand />
+        <div className="spacer" />
+      </div>
       <div className="container">{children}</div>
     </>
   );

@@ -16,11 +16,11 @@
 
 ## Composants
 
-| Module | Techno | Rôle |
-|---|---|---|
-| `api/` | Workers + Hono + D1 + KV | API REST, auth, billets, scan, stats |
-| `web/` | React + Vite | Dashboard organisateur + pages publiques d'inscription |
-| `mobile/` | Flutter (Android) | Scan des entrées, mode offline |
+| Module    | Techno                   | Rôle                                                   |
+| --------- | ------------------------ | ------------------------------------------------------ |
+| `api/`    | Workers + Hono + D1 + KV | API REST, auth, billets, scan, stats                   |
+| `web/`    | React + Vite             | Dashboard organisateur + pages publiques d'inscription |
+| `mobile/` | Flutter (Android)        | Scan des entrées, mode offline                         |
 
 ## Modèle de données (D1 / SQLite)
 
@@ -36,6 +36,7 @@
 ## Flux clés
 
 ### Génération & scan d'un billet
+
 1. L'organisateur génère des billets → chaque billet reçoit un `qr_token` = `<ticketId>.<HMAC-SHA256 tronqué>`.
 2. Le QR (SVG) encode ce token opaque.
 3. Le scanner (mobile) lit le QR → `POST /scan { token, deviceId }`.
@@ -45,11 +46,13 @@
    (`already_used`, `revoked`, `pending`, `wrong_event`, `invalid`).
 
 ### Inscription publique
+
 - `none` : pas d'inscription, billets distribués par l'organisateur.
 - `open` : inscription → billet `valid` immédiat + QR renvoyé.
 - `approval` : inscription → billet `pending` ; l'organisateur approuve depuis le dashboard.
 
 ### Mode offline (mobile)
+
 - Au login en ligne, l'app télécharge `GET /scan/manifest` (billets de l'événement) en cache `sqflite`.
 - Hors-ligne, la validation se fait sur le cache (token connu + non déjà utilisé localement),
   et chaque scan est mis en file.

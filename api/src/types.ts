@@ -1,4 +1,4 @@
-import type { Context } from "hono";
+import type { Context } from 'hono';
 
 /** Bindings Cloudflare + variables/secrets disponibles dans l'environnement. */
 export type Bindings = {
@@ -23,20 +23,14 @@ export type Variables = {
 export type AppEnv = { Bindings: Bindings; Variables: Variables };
 export type AppContext = Context<AppEnv>;
 
-export type RegistrationMode = "none" | "open" | "approval";
-export type EventStatus = "draft" | "published" | "closed";
-export type TicketStatus = "valid" | "used" | "revoked" | "pending";
+export type RegistrationMode = 'none' | 'open' | 'approval';
+export type EventStatus = 'draft' | 'published' | 'closed';
+export type TicketStatus = 'valid' | 'used' | 'revoked' | 'pending';
 export type ScanResult =
-  | "ok"
-  | "already_used"
-  | "invalid"
-  | "revoked"
-  | "pending"
-  | "wrong_event"
-  | "wrong_category";
+  'ok' | 'already_used' | 'invalid' | 'revoked' | 'pending' | 'wrong_event' | 'wrong_category';
 
-export type OrganizerRole = "organizer" | "admin";
-export type OrganizerStatus = "pending" | "approved" | "suspended";
+export type OrganizerRole = 'organizer' | 'admin';
+export type OrganizerStatus = 'pending' | 'approved' | 'suspended';
 
 export interface Organizer {
   id: string;
@@ -63,7 +57,7 @@ export interface EventRow {
   capacity: number | null;
   status: EventStatus;
   categories: string | null; // liste CSV des catégories proposées à l'inscription
-  theme: string | null;      // thème visuel (slug)
+  theme: string | null; // thème visuel (slug)
   created_at: string;
 }
 

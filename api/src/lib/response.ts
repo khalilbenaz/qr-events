@@ -1,4 +1,4 @@
-import type { Context } from "hono";
+import type { Context } from 'hono';
 
 /** Erreur applicative avec code HTTP — capturée par le handler onError. */
 export class ApiError extends Error {

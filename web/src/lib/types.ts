@@ -1,9 +1,9 @@
-export type RegistrationMode = "none" | "open" | "approval";
-export type EventStatus = "draft" | "published" | "closed";
-export type TicketStatus = "valid" | "used" | "revoked" | "pending";
+export type RegistrationMode = 'none' | 'open' | 'approval';
+export type EventStatus = 'draft' | 'published' | 'closed';
+export type TicketStatus = 'valid' | 'used' | 'revoked' | 'pending';
 
-export type OrganizerRole = "organizer" | "admin";
-export type OrganizerStatus = "pending" | "approved" | "suspended";
+export type OrganizerRole = 'organizer' | 'admin';
+export type OrganizerStatus = 'pending' | 'approved' | 'suspended';
 
 export interface Organizer {
   id: string;
@@ -36,7 +36,7 @@ export interface EventRow {
   capacity: number | null;
   status: EventStatus;
   categories: string | null; // CSV des catégories proposées à l'inscription
-  theme: string | null;      // thème visuel (slug)
+  theme: string | null; // thème visuel (slug)
   created_at: string;
   tickets_count?: number;
 }

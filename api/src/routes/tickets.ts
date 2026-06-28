@@ -1,9 +1,11 @@
-import { Hono } from "hono";
-import type { AppContext, AppEnv, TicketRow, TicketStatus } from "../types";
-import { newId, signQrToken } from "../lib/crypto";
-import { planOf } from "../lib/plans";
-import { ApiError, ok } from "../lib/response";
-import { getOwnedEvent } from "../middleware/tenant";
+import { Hono } from 'hono';
+import { zValidator } from '@hono/zod-validator';
+import { z } from 'zod';
+import type { AppContext, AppEnv, TicketRow, TicketStatus } from '../types';
+import { newId, signQrToken } from '../lib/crypto';
+import { planOf } from '../lib/plans';
+import { ApiError, ok } from '../lib/response';
+import { getOwnedEvent } from '../middleware/tenant';
 
 const tickets = new Hono<AppEnv>();
 
@@ -12,21 +14,21 @@ async function getOwnedTicket(c: AppContext, ticketId: string): Promise<TicketRo
   const row = await c.env.DB.prepare(
     `SELECT t.* FROM tickets t
        JOIN events e ON e.id = t.event_id
-      WHERE t.id = ? AND e.organizer_id = ?`
+      WHERE t.id = ? AND e.organizer_id = ?`,
   )
-    .bind(ticketId, c.get("organizerId"))
+    .bind(ticketId, c.get('organizerId'))
     .first<TicketRow>();
-  if (!row) throw new ApiError(404, "not_found", "Billet introuvable");
+  if (!row) throw new ApiError(404, 'not_found', 'Billet introuvable');
   return row;
 }
 
 // GET /events/:eventId/tickets — liste (filtrable par status)
-tickets.get("/events/:eventId/tickets", async (c) => {
-  const ev = await getOwnedEvent(c, c.req.param("eventId"));
-  const status = c.req.query("status");
+tickets.get('/events/:eventId/tickets', async (c) => {
+  const ev = await getOwnedEvent(c, c.req.param('eventId'));
+  const status = c.req.query('status');
   const sql = status
-    ? "SELECT * FROM tickets WHERE event_id = ? AND status = ? ORDER BY created_at DESC"
-    : "SELECT * FROM tickets WHERE event_id = ? ORDER BY created_at DESC";
+    ? 'SELECT * FROM tickets WHERE event_id = ? AND status = ? ORDER BY created_at DESC'
+    : 'SELECT * FROM tickets WHERE event_id = ? ORDER BY created_at DESC';
   const stmt = status
     ? c.env.DB.prepare(sql).bind(ev.id, status)
     : c.env.DB.prepare(sql).bind(ev.id);
@@ -36,41 +38,53 @@ tickets.get("/events/:eventId/tickets", async (c) => {
 
 // POST /events/:eventId/tickets/batch — générer un lot de billets
 //   { count, category?, holders?: [{ name, email, category? }] }
-tickets.post("/events/:eventId/tickets/batch", async (c) => {
-  const ev = await getOwnedEvent(c, c.req.param("eventId"));
-  const b = await c.req.json<{
-    count?: number;
-    category?: string;
-    holders?: { name?: string; email?: string; category?: string }[];
-  }>();
+tickets.post('/events/:eventId/tickets/batch',
+  zValidator('json', z.object({
+    count: z.number().int().optional(),
+    category: z.string().optional(),
+    holders: z.array(z.object({
+      name: z.string().optional(),
+      email: z.string().optional(),
+      category: z.string().optional()
+    })).optional()
+  })),
+  async (c) => {
+  const ev = await getOwnedEvent(c, c.req.param('eventId'));
+  const b = c.req.valid('json');
 
   const holders = b.holders ?? [];
-  const count = holders.length > 0 ? holders.length : b.count ?? 0;
+  const count = holders.length > 0 ? holders.length : (b.count ?? 0);
   if (!Number.isInteger(count) || count < 1 || count > 1000)
-    throw new ApiError(400, "invalid_count", "count entre 1 et 1000");
+    throw new ApiError(400, 'invalid_count', 'count entre 1 et 1000');
 
   // Limite d'offre : nombre de billets par événement.
-  const plan = planOf(c.get("organizerPlan"));
+  const plan = planOf(c.get('organizerPlan'));
   if (plan?.maxTicketsPerEvent != null) {
     const row = await c.env.DB.prepare(
-      "SELECT COUNT(*) AS c FROM tickets WHERE event_id = ? AND status <> 'revoked'"
-    ).bind(ev.id).first<{ c: number }>();
+      "SELECT COUNT(*) AS c FROM tickets WHERE event_id = ? AND status <> 'revoked'",
+    )
+      .bind(ev.id)
+      .first<{ c: number }>();
     if ((row?.c ?? 0) + count > plan.maxTicketsPerEvent)
-      throw new ApiError(403, "plan_limit_tickets",
-        `Offre ${plan.label} : limite de ${plan.maxTicketsPerEvent} billets/événement.`);
+      throw new ApiError(
+        403,
+        'plan_limit_tickets',
+        `Offre ${plan.label} : limite de ${plan.maxTicketsPerEvent} billets/événement.`,
+      );
   }
 
   // Respect de la capacité si définie.
   if (ev.capacity != null) {
     const { c: used } = (await c.env.DB.prepare(
-      "SELECT COUNT(*) AS c FROM tickets WHERE event_id = ? AND status <> 'revoked'"
-    ).bind(ev.id).first<{ c: number }>())!;
+      "SELECT COUNT(*) AS c FROM tickets WHERE event_id = ? AND status <> 'revoked'",
+    )
+      .bind(ev.id)
+      .first<{ c: number }>())!;
     if (used + count > ev.capacity)
-      throw new ApiError(409, "over_capacity",
-        `Capacité dépassée (${used}/${ev.capacity})`);
+      throw new ApiError(409, 'over_capacity', `Capacité dépassée (${used}/${ev.capacity})`);
   }
 
-  const defaultCategory = (b.category ?? "standard").trim() || "standard";
+  const defaultCategory = (b.category ?? 'standard').trim() || 'standard';
   const created: TicketRow[] = [];
   const stmts: D1PreparedStatement[] = [];
 
@@ -78,20 +92,24 @@ tickets.post("/events/:eventId/tickets/batch", async (c) => {
     const h = holders[i];
     const id = newId();
     const qr_token = await signQrToken(id, c.env.QR_HMAC_SECRET);
-    const category = (h?.category ?? defaultCategory).trim() || "standard";
+    const category = (h?.category ?? defaultCategory).trim() || 'standard';
     const row: TicketRow = {
-      id, event_id: ev.id,
+      id,
+      event_id: ev.id,
       holder_name: h?.name ?? null,
       holder_email: h?.email ?? null,
-      category, qr_token, status: "valid", created_at: "",
+      category,
+      qr_token,
+      status: 'valid',
+      created_at: '',
     };
     created.push(row);
     stmts.push(
       c.env.DB.prepare(
         `INSERT INTO tickets
            (id, event_id, holder_name, holder_email, category, qr_token, status)
-         VALUES (?, ?, ?, ?, ?, ?, 'valid')`
-      ).bind(id, ev.id, row.holder_name, row.holder_email, category, qr_token)
+         VALUES (?, ?, ?, ?, ?, ?, 'valid')`,
+      ).bind(id, ev.id, row.holder_name, row.holder_email, category, qr_token),
     );
   }
 
@@ -101,24 +119,28 @@ tickets.post("/events/:eventId/tickets/batch", async (c) => {
 
 // PATCH /tickets/:id — actions organisateur : approuver / révoquer / réactiver
 //   { action: 'approve' | 'revoke' | 'reinstate' }
-tickets.patch("/tickets/:id", async (c) => {
-  const t = await getOwnedTicket(c, c.req.param("id"));
-  const { action } = await c.req.json<{ action?: string }>();
+tickets.patch('/tickets/:id',
+  zValidator('json', z.object({
+    action: z.enum(['approve', 'revoke', 'reinstate'])
+  })),
+  async (c) => {
+  const t = await getOwnedTicket(c, c.req.param('id'));
+  const { action } = c.req.valid('json');
 
   const transitions: Record<string, { from: TicketStatus[]; to: TicketStatus }> = {
-    approve:   { from: ["pending"], to: "valid" },
-    revoke:    { from: ["valid", "used", "pending"], to: "revoked" },
-    reinstate: { from: ["revoked"], to: "valid" },
+    approve: { from: ['pending'], to: 'valid' },
+    revoke: { from: ['valid', 'used', 'pending'], to: 'revoked' },
+    reinstate: { from: ['revoked'], to: 'valid' },
   };
-  const tr = action ? transitions[action] : undefined;
-  if (!tr) throw new ApiError(400, "invalid_action", "action inconnue");
+  const tr = transitions[action];
   if (!tr.from.includes(t.status))
-    throw new ApiError(409, "invalid_transition",
-      `Transition '${action}' impossible depuis '${t.status}'`);
+    throw new ApiError(
+      409,
+      'invalid_transition',
+      `Transition '${action}' impossible depuis '${t.status}'`,
+    );
 
-  await c.env.DB.prepare("UPDATE tickets SET status = ? WHERE id = ?")
-    .bind(tr.to, t.id)
-    .run();
+  await c.env.DB.prepare('UPDATE tickets SET status = ? WHERE id = ?').bind(tr.to, t.id).run();
   return ok(c, { ...t, status: tr.to });
 });
 

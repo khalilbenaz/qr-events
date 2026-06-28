@@ -11,13 +11,20 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.8.0",
     "hono": "^4.6.14",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241127.0",
+    "@eslint/js": "^10.0.1",
     "@types/qrcode": "^1.5.5",
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0",
     "typescript": "^5.7.2",
+    "typescript-eslint": "^8.62.0",
+    "vitest": "^4.1.9",
     "wrangler": "^3.95.0"
   }
 }

@@ -1,4 +1,4 @@
-import QRCode from "qrcode";
+import QRCode from 'qrcode';
 
 /**
  * Génère un QR code au format SVG (pur JS, compatible Workers free-tier —
@@ -11,8 +11,8 @@ import QRCode from "qrcode";
  */
 export async function qrSvg(data: string): Promise<string> {
   return QRCode.toString(data, {
-    type: "svg",
-    errorCorrectionLevel: "M",
+    type: 'svg',
+    errorCorrectionLevel: 'M',
     margin: 2,
     width: 320,
   });

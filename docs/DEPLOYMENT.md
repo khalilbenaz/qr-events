@@ -4,15 +4,15 @@ Le projet est **déjà déployé**. Cette page documente l'état et comment repr
 
 ## État actuel
 
-| Élément | Valeur |
-|---|---|
-| **App** (web) | **https://qr-events.pages.dev** — Cloudflare Pages |
-| Vitrine | https://khalilbenaz.github.io/qr-events/ — GitHub Pages (statique) |
-| API (Worker) | https://qr-events-api.khalilbenaz.workers.dev |
-| D1 database | `qr-events` (`c49e10ec-…`) |
-| KV namespace | `CACHE` (`1de26c7d…`) |
-| Compte Cloudflare | demo@qrevents.app |
-| Dépôt | `khalilbenaz/qr-events` (public) |
+| Élément           | Valeur                                                             |
+| ----------------- | ------------------------------------------------------------------ |
+| **App** (web)     | **https://qr-events.pages.dev** — Cloudflare Pages                 |
+| Vitrine           | https://khalilbenaz.github.io/qr-events/ — GitHub Pages (statique) |
+| API (Worker)      | https://qr-events-api.khalilbenaz.workers.dev                      |
+| D1 database       | `qr-events` (`c49e10ec-…`)                                         |
+| KV namespace      | `CACHE` (`1de26c7d…`)                                              |
+| Compte Cloudflare | demo@qrevents.app                                               |
+| Dépôt             | `khalilbenaz/qr-events` (public)                                   |
 
 > ℹ️ **Répartition** : l'**application** (dashboard + pages publiques + scan) tourne sur
 > **Cloudflare Pages** (même plateforme que l'API). **GitHub Pages** n'héberge plus que la
@@ -37,6 +37,7 @@ npx wrangler deploy
 ```
 
 Variables (`wrangler.toml [vars]`) :
+
 - `ALLOWED_ORIGINS` — origines CORS autorisées (inclut `https://khalilbenaz.github.io`).
 - `PUBLIC_API_URL` — URL publique de l'API (liens QR).
 

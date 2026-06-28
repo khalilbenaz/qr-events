@@ -1,13 +1,13 @@
-import { Hono } from "hono";
-import type { AppEnv } from "../types";
-import { ok } from "../lib/response";
-import { getOwnedEvent } from "../middleware/tenant";
+import { Hono } from 'hono';
+import type { AppEnv } from '../types';
+import { ok } from '../lib/response';
+import { getOwnedEvent } from '../middleware/tenant';
 
 const stats = new Hono<AppEnv>();
 
 // GET /events/:id/stats — entrées temps réel + affluence par heure
-stats.get("/events/:id/stats", async (c) => {
-  const ev = await getOwnedEvent(c, c.req.param("id"));
+stats.get('/events/:id/stats', async (c) => {
+  const ev = await getOwnedEvent(c, c.req.param('id'));
 
   // Répartition des billets par statut (une seule requête agrégée).
   const byStatus = await c.env.DB.prepare(
@@ -17,8 +17,10 @@ stats.get("/events/:id/stats", async (c) => {
         SUM(CASE WHEN status = 'used'    THEN 1 ELSE 0 END) AS used,
         SUM(CASE WHEN status = 'revoked' THEN 1 ELSE 0 END) AS revoked,
         SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending
-       FROM tickets WHERE event_id = ?`
-  ).bind(ev.id).first<Record<string, number>>();
+       FROM tickets WHERE event_id = ?`,
+  )
+    .bind(ev.id)
+    .first<Record<string, number>>();
 
   const total = byStatus?.total ?? 0;
   const used = byStatus?.used ?? 0;
@@ -30,8 +32,10 @@ stats.get("/events/:id/stats", async (c) => {
     `SELECT strftime('%Y-%m-%dT%H:00', scanned_at) AS hour, COUNT(*) AS entries
        FROM scans
       WHERE event_id = ? AND result = 'ok'
-      GROUP BY hour ORDER BY hour`
-  ).bind(ev.id).all();
+      GROUP BY hour ORDER BY hour`,
+  )
+    .bind(ev.id)
+    .all();
 
   // Total des scans (toutes tentatives) pour visibilité opérationnelle.
   const scanTotals = await c.env.DB.prepare(
@@ -40,8 +44,10 @@ stats.get("/events/:id/stats", async (c) => {
         SUM(CASE WHEN result = 'ok'           THEN 1 ELSE 0 END) AS ok,
         SUM(CASE WHEN result = 'already_used' THEN 1 ELSE 0 END) AS already_used,
         SUM(CASE WHEN result NOT IN ('ok','already_used') THEN 1 ELSE 0 END) AS rejected
-       FROM scans WHERE event_id = ?`
-  ).bind(ev.id).first<Record<string, number>>();
+       FROM scans WHERE event_id = ?`,
+  )
+    .bind(ev.id)
+    .first<Record<string, number>>();
 
   return ok(c, {
     event: { id: ev.id, name: ev.name, capacity: ev.capacity },

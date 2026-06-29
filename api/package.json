@@ -8,13 +8,14 @@
     "deploy": "wrangler deploy",
     "db:migrate:local": "wrangler d1 migrations apply qr-events --local",
     "db:migrate:remote": "wrangler d1 migrations apply qr-events --remote",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.8.0",
     "hono": "^4.12.27",
     "qrcode": "^1.5.4",
-    "zod": "^3.25.76"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241127.0",

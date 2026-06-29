@@ -24,9 +24,10 @@ jobs:
         run: rm -f package-lock.json && npm install --legacy-peer-deps
         working-directory: .
       - run: npm run typecheck
+      - run: npm test
 
   web:
-    name: Web · build
+    name: Web · build + test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -42,6 +43,7 @@ jobs:
         run: rm -f package-lock.json && npm install --legacy-peer-deps
         working-directory: .
       - run: npm run build
+      - run: npm test
 
   mobile:
     name: Mobile · analyze

@@ -44,7 +44,7 @@ auth.post('/register',
     return !!r;
   });
 
-  // L'email admin (variable ADMIN_EMAIL) est auto-promu et auto-validé.
+  // L'email admin (secret ADMIN_EMAIL) est auto-promu et auto-validé.
   const isAdmin = email === (c.env.ADMIN_EMAIL ?? '').trim().toLowerCase();
   const role = isAdmin ? 'admin' : 'organizer';
   const status = isAdmin ? 'approved' : 'pending';

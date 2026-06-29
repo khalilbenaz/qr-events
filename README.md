@@ -12,8 +12,7 @@ mobile de scan. Tout tient dans le **free tier Cloudflare**.
 | ⚙️ API (Cloudflare Worker)                      | https://qr-events-api.khalilbenaz.workers.dev                                       |
 | 📱 Mobile (APK)                                 | [Dernière release GitHub](https://github.com/khalilbenaz/qr-events/releases/latest) |
 
-> 🧪 **Démo** — organisateur : `demo@qrevents.app` / `demo12345` ·
-> admin : `demo@qrevents.app` / `***REMOVED***` (page `/app/admin`).
+> 🧪 **Démo** — organisateur : `demo@qrevents.app` / `demo12345`.
 
 📖 Docs : [Architecture](docs/ARCHITECTURE.md) · [Déploiement](docs/DEPLOYMENT.md)
 
@@ -63,9 +62,9 @@ mobile/  Flutter Android (scan)                ← Étape 4 ✅
 
 ### Comptes & offres
 
-- **Administrateur** : le compte dont l'email = `ADMIN_EMAIL` (variable du Worker) est
-  **auto-validé** avec le rôle admin. Mets-y **ton email** puis `npx wrangler deploy`, ou
-  utilise le compte admin de démo.
+- **Administrateur** : le compte dont l'email = `ADMIN_EMAIL` est **auto-validé** avec le rôle
+  admin. `ADMIN_EMAIL` est un **secret** (jamais commité) : `npx wrangler secret put ADMIN_EMAIL`
+  avec **ton email**, puis `npx wrangler deploy`.
 - **Validation** : un nouvel organisateur est `pending` (il voit un écran d'attente et ne peut
   rien créer). L'admin le valide depuis **`/app/admin`** et choisit son offre.
 - **Offres** (limites, modifiables dans `api/src/lib/plans.ts` + `web/src/lib/plans.ts`) :

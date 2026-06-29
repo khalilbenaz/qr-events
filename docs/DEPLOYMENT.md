@@ -11,7 +11,7 @@ Le projet est **déjà déployé**. Cette page documente l'état et comment repr
 | API (Worker)      | https://qr-events-api.khalilbenaz.workers.dev                      |
 | D1 database       | `qr-events` (`c49e10ec-…`)                                         |
 | KV namespace      | `CACHE` (`1de26c7d…`)                                              |
-| Compte Cloudflare | demo@qrevents.app                                               |
+| Compte Cloudflare | `demo@qrevents.app` _(remplace par le tien — voir `wrangler whoami`)_ |
 | Dépôt             | `khalilbenaz/qr-events` (public)                                   |
 
 > ℹ️ **Répartition** : l'**application** (dashboard + pages publiques + scan) tourne sur

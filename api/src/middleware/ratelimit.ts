@@ -15,14 +15,22 @@ export async function rateLimit(
 ): Promise<void> {
   const window = Math.floor(nowSeconds() / windowSeconds);
   const key = `rl:${bucket}:${identifier}:${window}`;
-  const current = parseInt((await c.env.CACHE.get(key)) ?? '0', 10);
-  if (current >= limit) {
-    throw new ApiError(429, 'rate_limited', 'Trop de requêtes, réessayez plus tard');
+  try {
+    const current = parseInt((await c.env.CACHE.get(key)) ?? '0', 10);
+    if (current >= limit) {
+      throw new ApiError(429, 'rate_limited', 'Trop de requêtes, réessayez plus tard');
+    }
+    // TTL = fin de la fenêtre courante (+1s de marge).
+    await c.env.CACHE.put(key, String(current + 1), {
+      expirationTtl: windowSeconds + 1,
+    });
+  } catch (err) {
+    // La limite atteinte (429) doit remonter. En revanche une erreur d'infra KV
+    // (quota journalier du free tier dépassé, panne transitoire) ne doit JAMAIS
+    // faire tomber l'endpoint protégé (login, scan…) → fail-open.
+    if (err instanceof ApiError) throw err;
+    console.warn('rateLimit: KV indisponible, fail-open', { bucket, err: String(err) });
   }
-  // TTL = fin de la fenêtre courante (+1s de marge).
-  await c.env.CACHE.put(key, String(current + 1), {
-    expirationTtl: windowSeconds + 1,
-  });
 }
 
 /** Identifiant de l'appelant pour le rate-limit (IP Cloudflare en priorité). */
